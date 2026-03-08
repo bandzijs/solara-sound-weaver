@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAdmin } from "@/contexts/AdminContext";
 import { supabase } from "@/lib/supabase";
-import { Trash2, Plus, ArrowLeft, Music, MessageCircle, Pencil } from "lucide-react";
+import { Trash2, Plus, ArrowLeft, Music, MessageCircle, Pencil, Users } from "lucide-react";
+import CommunityModeration from "@/components/admin/CommunityModeration";
 
 interface SongRow {
   id: string;
@@ -52,7 +53,7 @@ const emptyForm = {
 const AdminPanel = () => {
   const { isAdmin, loginAdmin } = useAdmin();
   const navigate = useNavigate();
-  const [tab, setTab] = useState<"songs" | "comments">("songs");
+  const [tab, setTab] = useState<"songs" | "comments" | "community">("songs");
   const [songs, setSongs] = useState<SongRow[]>([]);
   const [comments, setComments] = useState<CommentRow[]>([]);
   const [form, setForm] = useState(emptyForm);
@@ -233,6 +234,16 @@ const AdminPanel = () => {
             >
               <MessageCircle className="w-3.5 h-3.5" /> Comments
             </button>
+            <button
+              onClick={() => setTab("community")}
+              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-body tracking-widest border transition-all ${
+                tab === "community"
+                  ? "border-primary text-primary glow-box"
+                  : "border-border text-muted-foreground hover:border-primary/50"
+              }`}
+            >
+              <Users className="w-3.5 h-3.5" /> Kopiena
+            </button>
           </div>
         </div>
       </header>
@@ -377,6 +388,7 @@ const AdminPanel = () => {
             </div>
           </div>
         )}
+        {tab === "community" && <CommunityModeration />}
       </main>
     </div>
   );
