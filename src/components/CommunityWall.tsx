@@ -52,7 +52,7 @@ const CommunityWall = () => {
             placeholder={t.community.namePlaceholder}
             value={name}
             onChange={(e) => setName(e.target.value)}
-            readOnly={!!user}
+            
             className="bg-card/40 border border-border rounded-lg px-4 py-2.5 font-body text-foreground text-sm focus:border-primary focus:outline-none transition-colors sm:w-1/4"
           />
           <input
