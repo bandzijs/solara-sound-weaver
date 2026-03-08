@@ -67,7 +67,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const avatarUrl = user?.user_metadata?.avatar_url ?? null;
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, isAdmin, displayName, avatarUrl, signInWithOtp, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, isAdmin, displayName, avatarUrl, signInWithOtp, verifyOtp, signOut }}>
       {children}
     </AuthContext.Provider>
   );
