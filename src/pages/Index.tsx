@@ -9,6 +9,7 @@ import SubmitForm from "@/components/SubmitForm";
 import Forum from "@/components/Forum";
 import Footer from "@/components/Footer";
 import CookieConsent from "@/components/CookieConsent";
+import BannerSection from "@/components/BannerSection";
 
 const Index = () => {
   return (
@@ -18,6 +19,7 @@ const Index = () => {
         <Navbar />
         <HeroSection />
         <AboutSection />
+        <BannerSection />
         <MusicGallery />
         <HowItWorks />
         <SubmitForm />

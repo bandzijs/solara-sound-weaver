@@ -358,6 +358,8 @@ const AdminPanel = () => {
         {tab === "community" && <CommunityModeration />}
 
         {tab === "links" && <SocialLinksAdmin />}
+
+        {tab === "banners" && <BannersAdmin />}
       </main>
     </div>
   );
