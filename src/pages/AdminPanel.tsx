@@ -2,9 +2,10 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAdmin } from "@/contexts/AdminContext";
 import { supabase } from "@/lib/supabase";
-import { Trash2, Plus, ArrowLeft, Music, Pencil, Users, Link2 } from "lucide-react";
+import { Trash2, Plus, ArrowLeft, Music, Pencil, Users, Link2, Image as ImageIcon } from "lucide-react";
 import CommunityModeration from "@/components/admin/CommunityModeration";
 import SocialLinksAdmin from "@/components/admin/SocialLinksAdmin";
+import BannersAdmin from "@/components/admin/BannersAdmin";
 
 interface SongRow {
   id: string;
@@ -48,7 +49,7 @@ const emptyForm = {
 const AdminPanel = () => {
   const { isAdmin, loginAdmin } = useAdmin();
   const navigate = useNavigate();
-  const [tab, setTab] = useState<"songs" | "community" | "links">("songs");
+  const [tab, setTab] = useState<"songs" | "community" | "links" | "banners">("songs");
   const [songs, setSongs] = useState<SongRow[]>([]);
   const [form, setForm] = useState(emptyForm);
   const [showForm, setShowForm] = useState(false);
@@ -222,6 +223,16 @@ const AdminPanel = () => {
             >
               <Link2 className="w-3.5 h-3.5" /> Saites
             </button>
+            <button
+              onClick={() => setTab("banners")}
+              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-body tracking-widest border transition-all ${
+                tab === "banners"
+                  ? "border-primary text-primary glow-box"
+                  : "border-border text-muted-foreground hover:border-primary/50"
+              }`}
+            >
+              <ImageIcon className="w-3.5 h-3.5" /> Baneri
+            </button>
           </div>
         </div>
       </header>
@@ -347,6 +358,8 @@ const AdminPanel = () => {
         {tab === "community" && <CommunityModeration />}
 
         {tab === "links" && <SocialLinksAdmin />}
+
+        {tab === "banners" && <BannersAdmin />}
       </main>
     </div>
   );
