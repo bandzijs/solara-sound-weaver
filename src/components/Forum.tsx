@@ -407,9 +407,9 @@ const Forum = () => {
         {user ? (
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-3">
-              <AvatarBubble url={avatarUrl} name={displayName || user.email || "User"} />
+              <AvatarBubble url={avatarUrl} name={displayName} />
               <span className="text-xs font-body text-muted-foreground tracking-wide truncate">
-                {displayName || user.email}
+                {displayName}
               </span>
             </div>
 
