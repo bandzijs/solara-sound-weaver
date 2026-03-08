@@ -319,9 +319,9 @@ const AdminPanel = () => {
 
                 <div className="flex gap-3 pt-2">
                   <button type="submit" disabled={saving} className="px-6 py-2.5 rounded-lg bg-primary text-primary-foreground font-body text-sm tracking-widest hover:bg-primary/80 transition-all disabled:opacity-50">
-                    {saving ? "Saving..." : "Save Song"}
+                    {saving ? "Saving..." : editingId ? "Update Song" : "Save Song"}
                   </button>
-                  <button type="button" onClick={() => setShowForm(false)} className="px-6 py-2.5 rounded-lg border border-border text-muted-foreground font-body text-sm hover:text-foreground transition-colors">
+                  <button type="button" onClick={() => { setShowForm(false); setEditingId(null); setForm(emptyForm); }} className="px-6 py-2.5 rounded-lg border border-border text-muted-foreground font-body text-sm hover:text-foreground transition-colors">
                     Cancel
                   </button>
                 </div>
