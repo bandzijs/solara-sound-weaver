@@ -50,7 +50,7 @@ const emptyForm = {
 };
 
 const AdminPanel = () => {
-  const { isAdmin, adminLoading } = useAdmin();
+  const { isAdmin } = useAdmin();
   const navigate = useNavigate();
   const [tab, setTab] = useState<"songs" | "comments">("songs");
   const [songs, setSongs] = useState<SongRow[]>([]);
@@ -60,10 +60,10 @@ const AdminPanel = () => {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (!adminLoading && !isAdmin) {
+    if (!isAdmin) {
       navigate("/");
     }
-  }, [isAdmin, adminLoading, navigate]);
+  }, [isAdmin, navigate]);
 
   useEffect(() => {
     if (isAdmin) {
@@ -124,14 +124,6 @@ const AdminPanel = () => {
       .eq("id", id);
     if (!error) setComments((prev) => prev.filter((c) => c.id !== id));
   };
-
-  if (adminLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-muted-foreground font-body">Loading...</p>
-      </div>
-    );
-  }
 
   if (!isAdmin) return null;
 
@@ -199,70 +191,36 @@ const AdminPanel = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-body text-muted-foreground mb-1 tracking-wider">Title LV</label>
-                    <input
-                      required
-                      value={form.title_lv}
-                      onChange={(e) => setForm({ ...form, title_lv: e.target.value })}
-                      className={inputClass}
-                    />
+                    <input required value={form.title_lv} onChange={(e) => setForm({ ...form, title_lv: e.target.value })} className={inputClass} />
                   </div>
                   <div>
                     <label className="block text-xs font-body text-muted-foreground mb-1 tracking-wider">Title EN</label>
-                    <input
-                      required
-                      value={form.title_en}
-                      onChange={(e) => setForm({ ...form, title_en: e.target.value })}
-                      className={inputClass}
-                    />
+                    <input required value={form.title_en} onChange={(e) => setForm({ ...form, title_en: e.target.value })} className={inputClass} />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-xs font-body text-muted-foreground mb-1 tracking-wider">YouTube ID</label>
-                    <input
-                      required
-                      value={form.youtube_id}
-                      onChange={(e) => setForm({ ...form, youtube_id: e.target.value })}
-                      placeholder="e.g. IWEwra0b4p4"
-                      className={inputClass}
-                    />
+                    <input required value={form.youtube_id} onChange={(e) => setForm({ ...form, youtube_id: e.target.value })} placeholder="e.g. IWEwra0b4p4" className={inputClass} />
                   </div>
                   <div>
                     <label className="block text-xs font-body text-muted-foreground mb-1 tracking-wider">Style</label>
-                    <select
-                      value={form.style}
-                      onChange={(e) => setForm({ ...form, style: e.target.value })}
-                      className={inputClass}
-                    >
-                      {STYLE_OPTIONS.map((s) => (
-                        <option key={s.value} value={s.value}>{s.label}</option>
-                      ))}
+                    <select value={form.style} onChange={(e) => setForm({ ...form, style: e.target.value })} className={inputClass}>
+                      {STYLE_OPTIONS.map((s) => (<option key={s.value} value={s.value}>{s.label}</option>))}
                     </select>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div>
                       <label className="block text-xs font-body text-muted-foreground mb-1 tracking-wider">Badge LV</label>
-                      <select
-                        value={form.badge_lv}
-                        onChange={(e) => setForm({ ...form, badge_lv: e.target.value })}
-                        className={inputClass}
-                      >
-                        {BADGE_OPTIONS_LV.map((b) => (
-                          <option key={b} value={b}>{b}</option>
-                        ))}
+                      <select value={form.badge_lv} onChange={(e) => setForm({ ...form, badge_lv: e.target.value })} className={inputClass}>
+                        {BADGE_OPTIONS_LV.map((b) => (<option key={b} value={b}>{b}</option>))}
                       </select>
                     </div>
                     <div>
                       <label className="block text-xs font-body text-muted-foreground mb-1 tracking-wider">Badge EN</label>
-                      <select
-                        value={form.badge_en}
-                        onChange={(e) => setForm({ ...form, badge_en: e.target.value })}
-                        className={inputClass}
-                      >
-                        {BADGE_OPTIONS_EN.map((b) => (
-                          <option key={b} value={b}>{b}</option>
-                        ))}
+                      <select value={form.badge_en} onChange={(e) => setForm({ ...form, badge_en: e.target.value })} className={inputClass}>
+                        {BADGE_OPTIONS_EN.map((b) => (<option key={b} value={b}>{b}</option>))}
                       </select>
                     </div>
                   </div>
@@ -271,58 +229,30 @@ const AdminPanel = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-body text-muted-foreground mb-1 tracking-wider">Poem LV</label>
-                    <textarea
-                      required
-                      rows={4}
-                      value={form.poem_lv}
-                      onChange={(e) => setForm({ ...form, poem_lv: e.target.value })}
-                      className={inputClass + " resize-y"}
-                    />
+                    <textarea required rows={4} value={form.poem_lv} onChange={(e) => setForm({ ...form, poem_lv: e.target.value })} className={inputClass + " resize-y"} />
                   </div>
                   <div>
                     <label className="block text-xs font-body text-muted-foreground mb-1 tracking-wider">Poem EN</label>
-                    <textarea
-                      required
-                      rows={4}
-                      value={form.poem_en}
-                      onChange={(e) => setForm({ ...form, poem_en: e.target.value })}
-                      className={inputClass + " resize-y"}
-                    />
+                    <textarea required rows={4} value={form.poem_en} onChange={(e) => setForm({ ...form, poem_en: e.target.value })} className={inputClass + " resize-y"} />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-body text-muted-foreground mb-1 tracking-wider">Author Note LV (optional)</label>
-                    <input
-                      value={form.author_note_lv}
-                      onChange={(e) => setForm({ ...form, author_note_lv: e.target.value })}
-                      className={inputClass}
-                    />
+                    <input value={form.author_note_lv} onChange={(e) => setForm({ ...form, author_note_lv: e.target.value })} className={inputClass} />
                   </div>
                   <div>
                     <label className="block text-xs font-body text-muted-foreground mb-1 tracking-wider">Author Note EN (optional)</label>
-                    <input
-                      value={form.author_note_en}
-                      onChange={(e) => setForm({ ...form, author_note_en: e.target.value })}
-                      className={inputClass}
-                    />
+                    <input value={form.author_note_en} onChange={(e) => setForm({ ...form, author_note_en: e.target.value })} className={inputClass} />
                   </div>
                 </div>
 
                 <div className="flex gap-3 pt-2">
-                  <button
-                    type="submit"
-                    disabled={saving}
-                    className="px-6 py-2.5 rounded-lg bg-primary text-primary-foreground font-body text-sm tracking-widest hover:bg-primary/80 transition-all disabled:opacity-50"
-                  >
+                  <button type="submit" disabled={saving} className="px-6 py-2.5 rounded-lg bg-primary text-primary-foreground font-body text-sm tracking-widest hover:bg-primary/80 transition-all disabled:opacity-50">
                     {saving ? "Saving..." : "Save Song"}
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowForm(false)}
-                    className="px-6 py-2.5 rounded-lg border border-border text-muted-foreground font-body text-sm hover:text-foreground transition-colors"
-                  >
+                  <button type="button" onClick={() => setShowForm(false)} className="px-6 py-2.5 rounded-lg border border-border text-muted-foreground font-body text-sm hover:text-foreground transition-colors">
                     Cancel
                   </button>
                 </div>
@@ -331,69 +261,45 @@ const AdminPanel = () => {
 
             <div className="space-y-3">
               {songs.map((song) => (
-                <div
-                  key={song.id}
-                  className="flex items-center justify-between p-4 rounded-xl border border-border/30 bg-card/20 backdrop-blur-sm"
-                >
+                <div key={song.id} className="flex items-center justify-between p-4 rounded-xl border border-border/30 bg-card/20 backdrop-blur-sm">
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-heading text-sm tracking-wider text-foreground truncate">
-                      {song.title_lv}
-                    </h3>
+                    <h3 className="font-heading text-sm tracking-wider text-foreground truncate">{song.title_lv}</h3>
                     <div className="flex items-center gap-2 mt-1">
                       <span className="text-[10px] font-body tracking-widest text-primary/60 border border-primary/20 rounded-full px-2 py-0.5">
                         {STYLE_OPTIONS.find((s) => s.value === song.style)?.label}
                       </span>
-                      <span className="text-[10px] font-body tracking-widest text-muted-foreground">
-                        {song.badge_lv}
-                      </span>
+                      <span className="text-[10px] font-body tracking-widest text-muted-foreground">{song.badge_lv}</span>
                     </div>
                   </div>
-                  <button
-                    onClick={() => handleDeleteSong(song.id)}
-                    className="text-muted-foreground hover:text-destructive transition-colors ml-3"
-                  >
+                  <button onClick={() => handleDeleteSong(song.id)} className="text-muted-foreground hover:text-destructive transition-colors ml-3">
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
               ))}
-              {songs.length === 0 && (
-                <p className="text-center text-muted-foreground font-body text-sm py-8">No songs yet</p>
-              )}
+              {songs.length === 0 && <p className="text-center text-muted-foreground font-body text-sm py-8">No songs yet</p>}
             </div>
           </div>
         )}
 
         {tab === "comments" && (
           <div>
-            <h2 className="font-heading text-xl text-foreground tracking-wider mb-6">
-              Comments ({comments.length})
-            </h2>
+            <h2 className="font-heading text-xl text-foreground tracking-wider mb-6">Comments ({comments.length})</h2>
             <div className="space-y-3">
               {comments.map((c) => (
-                <div
-                  key={c.id}
-                  className="flex items-start justify-between p-4 rounded-xl border border-border/30 bg-card/20 backdrop-blur-sm gap-3"
-                >
+                <div key={c.id} className="flex items-start justify-between p-4 rounded-xl border border-border/30 bg-card/20 backdrop-blur-sm gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="font-heading text-xs tracking-wider text-primary">{c.name}</span>
-                      <span className="text-[10px] text-muted-foreground font-body">
-                        {new Date(c.created_at).toLocaleDateString()}
-                      </span>
+                      <span className="text-[10px] text-muted-foreground font-body">{new Date(c.created_at).toLocaleDateString()}</span>
                     </div>
                     <p className="font-body text-sm text-foreground/70 mt-1">{c.message}</p>
                   </div>
-                  <button
-                    onClick={() => handleDeleteComment(c.id)}
-                    className="text-muted-foreground hover:text-destructive transition-colors shrink-0 mt-1"
-                  >
+                  <button onClick={() => handleDeleteComment(c.id)} className="text-muted-foreground hover:text-destructive transition-colors shrink-0 mt-1">
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
               ))}
-              {comments.length === 0 && (
-                <p className="text-center text-muted-foreground font-body text-sm py-8">No comments</p>
-              )}
+              {comments.length === 0 && <p className="text-center text-muted-foreground font-body text-sm py-8">No comments</p>}
             </div>
           </div>
         )}
