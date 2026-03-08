@@ -11,9 +11,16 @@ const HeroSection = () => {
       <img
         src="https://i.postimg.cc/x1H7CT5f/Chat-GPT-Image-2025-g-28-okt-11-22-58.png"
         alt="Solara Music Vibes"
-        className="w-full max-w-[260px] mb-4"
+        className="w-full max-w-[200px] rounded-full mb-4"
         style={{ filter: "drop-shadow(0 0 25px rgba(77,217,224,0.8))" }}
       />
+
+      <h1
+        className="font-heading text-[3rem] tracking-[0.3em] text-foreground mb-2"
+        style={{ textShadow: "0 0 20px rgba(77,217,224,0.6)" }}
+      >
+        SOLARA
+      </h1>
       <p className="font-heading text-lg md:text-xl tracking-[0.3em] text-primary/80 mb-8">
         Music Vibes
       </p>
