@@ -50,7 +50,7 @@ const emptyForm = {
 };
 
 const AdminPanel = () => {
-  const { isAdmin } = useAdmin();
+  const { isAdmin, loginAdmin } = useAdmin();
   const navigate = useNavigate();
   const [tab, setTab] = useState<"songs" | "comments">("songs");
   const [songs, setSongs] = useState<SongRow[]>([]);
@@ -59,11 +59,8 @@ const AdminPanel = () => {
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    if (!isAdmin) {
-      navigate("/");
-    }
-  }, [isAdmin, navigate]);
+  const [password, setPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
 
   useEffect(() => {
     if (isAdmin) {
@@ -125,7 +122,40 @@ const AdminPanel = () => {
     if (!error) setComments((prev) => prev.filter((c) => c.id !== id));
   };
 
-  if (!isAdmin) return null;
+  const handleAdminLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (loginAdmin(password)) {
+      setPassword("");
+      setLoginError("");
+    } else {
+      setLoginError("Wrong password");
+    }
+  };
+
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
+        <form onSubmit={handleAdminLogin} className="w-full max-w-sm p-8 rounded-2xl border border-border/50 bg-card/30 backdrop-blur-sm space-y-4 text-center">
+          <h1 className="font-heading text-xl text-primary tracking-wider">Solara Admin</h1>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Enter admin password"
+            autoFocus
+            className="w-full bg-card/40 border border-border rounded-lg px-4 py-2.5 font-body text-foreground text-sm focus:border-primary focus:outline-none transition-colors"
+          />
+          {loginError && <p className="text-destructive text-xs font-body">{loginError}</p>}
+          <button type="submit" className="w-full px-6 py-2.5 rounded-lg bg-primary text-primary-foreground font-body text-sm tracking-widest hover:bg-primary/80 transition-all">
+            Login
+          </button>
+          <button type="button" onClick={() => navigate("/")} className="text-xs text-muted-foreground hover:text-foreground font-body transition-colors">
+            ← Back to site
+          </button>
+        </form>
+      </div>
+    );
+  }
 
   const inputClass =
     "w-full bg-card/40 border border-border rounded-lg px-4 py-2.5 font-body text-foreground text-sm focus:border-primary focus:outline-none transition-colors";
