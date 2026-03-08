@@ -340,9 +340,14 @@ const AdminPanel = () => {
                       <span className="text-[10px] font-body tracking-widest text-muted-foreground">{song.badge_lv}</span>
                     </div>
                   </div>
-                  <button onClick={() => handleDeleteSong(song.id)} className="text-muted-foreground hover:text-destructive transition-colors ml-3">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  <div className="flex items-center gap-1 ml-3">
+                    <button onClick={() => handleEditSong(song)} className="text-muted-foreground hover:text-primary transition-colors">
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => handleDeleteSong(song.id)} className="text-muted-foreground hover:text-destructive transition-colors">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               ))}
               {songs.length === 0 && <p className="text-center text-muted-foreground font-body text-sm py-8">No songs yet</p>}
