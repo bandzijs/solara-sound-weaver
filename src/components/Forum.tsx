@@ -79,8 +79,8 @@ const Forum = () => {
 
     if (!error && data) {
       const topicIds = data.map((t) => t.id);
-
       const counts: Record<string, number> = {};
+
       if (topicIds.length > 0) {
         const { data: countData } = await supabase
           .from("comments")
@@ -91,11 +91,6 @@ const Forum = () => {
           counts[c.topic_id] = (counts[c.topic_id] || 0) + 1;
         });
       }
-
-      const counts: Record<string, number> = {};
-      countData?.forEach((c) => {
-        counts[c.topic_id] = (counts[c.topic_id] || 0) + 1;
-      });
 
       setTopics(data.map((t) => ({ ...t, comment_count: counts[t.id] || 0 })));
     } else if (error) {
