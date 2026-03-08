@@ -43,6 +43,7 @@ export const translations = {
     },
     footer: {
       poetic: "Kur zvaigznes satiek vārdus.",
+      copyright: "© 2026 Solara Music Vibes. Visas tiesības aizsargātas.",
     },
     moods: {
       melancholic: "Melanholiska",
