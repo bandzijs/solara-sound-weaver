@@ -4,11 +4,13 @@ import { supabase } from "@/lib/supabase";
 import { styleKeys, type Song } from "@/data/songs";
 import { Search, ChevronLeft, ChevronRight } from "lucide-react";
 import StarRating from "@/components/StarRating";
+import { hasConsent } from "@/lib/cookieConsent";
 
 const SONGS_PER_PAGE = 9;
 
-// Get or create a persistent visitor ID
-function getVisitorId(): string {
+// Get or create a persistent visitor ID — only if consent given
+function getVisitorId(): string | null {
+  if (!hasConsent()) return null;
   const key = "solara_visitor_id";
   let id = localStorage.getItem(key);
   if (!id) {
@@ -33,7 +35,7 @@ interface DbSong {
 }
 
 interface SongWithDb extends Song {
-  dbId: string; // actual UUID from songs table
+  dbId: string;
 }
 
 const mapDbSong = (s: DbSong, i: number): SongWithDb => ({
@@ -64,8 +66,20 @@ const MusicGallery = () => {
   const [page, setPage] = useState(1);
   const [allSongs, setAllSongs] = useState<SongWithDb[]>([]);
   const [ratings, setRatings] = useState<Record<string, RatingData>>({});
+  const [cookiesAccepted, setCookiesAccepted] = useState(hasConsent());
   const sectionRef = useRef<HTMLElement>(null);
   const visitorId = useRef(getVisitorId());
+
+  // Listen for consent changes
+  useEffect(() => {
+    const handler = () => {
+      const accepted = hasConsent();
+      setCookiesAccepted(accepted);
+      visitorId.current = getVisitorId();
+    };
+    window.addEventListener("cookie-consent-change", handler);
+    return () => window.removeEventListener("cookie-consent-change", handler);
+  }, []);
 
   const fetchSongs = async () => {
     const { data } = await supabase
@@ -81,7 +95,6 @@ const MusicGallery = () => {
   const fetchRatings = useCallback(async (songIds: string[]) => {
     if (songIds.length === 0) return;
 
-    // Fetch all ratings for these songs
     const { data } = await supabase
       .from("song_ratings")
       .select("song_id, rating, visitor_id")
@@ -89,18 +102,16 @@ const MusicGallery = () => {
 
     if (data) {
       const map: Record<string, RatingData> = {};
-      // Initialize all songs
       songIds.forEach((id) => {
         map[id] = { average: 0, count: 0, userRating: null };
       });
 
-      // Aggregate
       const totals: Record<string, { sum: number; count: number }> = {};
       data.forEach((r) => {
         if (!totals[r.song_id]) totals[r.song_id] = { sum: 0, count: 0 };
         totals[r.song_id].sum += r.rating;
         totals[r.song_id].count += 1;
-        if (r.visitor_id === visitorId.current) {
+        if (visitorId.current && r.visitor_id === visitorId.current) {
           if (map[r.song_id]) map[r.song_id].userRating = r.rating;
         }
       });
@@ -131,7 +142,6 @@ const MusicGallery = () => {
     };
   }, []);
 
-  // Fetch ratings when songs load
   useEffect(() => {
     if (allSongs.length > 0) {
       fetchRatings(allSongs.map((s) => s.dbId));
@@ -140,8 +150,8 @@ const MusicGallery = () => {
 
   const handleRate = async (songDbId: string, rating: number) => {
     const vid = visitorId.current;
+    if (!vid) return; // No consent — don't rate
 
-    // Optimistic update
     setRatings((prev) => {
       const old = prev[songDbId] || { average: 0, count: 0, userRating: null };
       const hadVote = old.userRating !== null;
@@ -159,7 +169,6 @@ const MusicGallery = () => {
       };
     });
 
-    // Upsert to Supabase
     await supabase.from("song_ratings").upsert(
       { song_id: songDbId, visitor_id: vid, rating },
       { onConflict: "song_id,visitor_id" }
@@ -190,7 +199,6 @@ const MusicGallery = () => {
     sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  // Reset page when filter or search changes
   useEffect(() => { setPage(1); }, [filter, search]);
 
   return (
@@ -257,14 +265,33 @@ const MusicGallery = () => {
                 className="rounded-2xl border border-border/50 bg-card/40 backdrop-blur-sm overflow-hidden glow-box-hover"
               >
                 <div className="aspect-video bg-secondary/30">
-                  <iframe
-                    src={`https://www.youtube.com/embed/${song.youtubeId}`}
-                    className="w-full h-full"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    title={lang === "lv" ? song.titleLV : song.titleEN}
-                    loading="lazy"
-                  />
+                  {cookiesAccepted ? (
+                    <iframe
+                      src={`https://www.youtube.com/embed/${song.youtubeId}`}
+                      className="w-full h-full"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      title={lang === "lv" ? song.titleLV : song.titleEN}
+                      loading="lazy"
+                    />
+                  ) : (
+                    <a
+                      href={`https://www.youtube.com/watch?v=${song.youtubeId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full h-full flex flex-col items-center justify-center gap-2 hover:bg-secondary/50 transition-colors"
+                    >
+                      <img
+                        src={`https://img.youtube.com/vi/${song.youtubeId}/mqdefault.jpg`}
+                        alt={lang === "lv" ? song.titleLV : song.titleEN}
+                        className="w-full h-full object-cover opacity-60"
+                        loading="lazy"
+                      />
+                      <span className="absolute text-xs font-body text-foreground/70 bg-background/80 backdrop-blur-sm rounded-full px-3 py-1 tracking-wider">
+                        {lang === "lv" ? "▶ Skatīt YouTube" : "▶ Watch on YouTube"}
+                      </span>
+                    </a>
+                  )}
                 </div>
                 <div className="p-5">
                   <div className="flex items-center justify-between mb-2">
@@ -281,15 +308,25 @@ const MusicGallery = () => {
                     </span>
                   </div>
 
-                  {/* Star Rating */}
+                  {/* Star Rating — disabled if no consent */}
                   <div className="mb-3">
-                    <StarRating
-                      songId={song.dbId}
-                      averageRating={r.average}
-                      totalVotes={r.count}
-                      userRating={r.userRating}
-                      onRate={(rating) => handleRate(song.dbId, rating)}
-                    />
+                    {cookiesAccepted ? (
+                      <StarRating
+                        songId={song.dbId}
+                        averageRating={r.average}
+                        totalVotes={r.count}
+                        userRating={r.userRating}
+                        onRate={(rating) => handleRate(song.dbId, rating)}
+                      />
+                    ) : (
+                      <StarRating
+                        songId={song.dbId}
+                        averageRating={r.average}
+                        totalVotes={r.count}
+                        userRating={null}
+                        onRate={() => {}}
+                      />
+                    )}
                   </div>
 
                   <p className="font-body text-sm text-foreground/50 italic mb-3 whitespace-pre-line line-clamp-4">

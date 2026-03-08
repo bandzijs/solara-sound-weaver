@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getConsentStatus } from "@/lib/cookieConsent";
 
 const COOKIE_KEY = "solara_cookie_consent";
 
@@ -8,8 +9,7 @@ const CookieConsent = () => {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    const consent = localStorage.getItem(COOKIE_KEY);
-    if (!consent) {
+    if (getConsentStatus() === "pending") {
       const timer = setTimeout(() => setVisible(true), 1000);
       return () => clearTimeout(timer);
     }
@@ -18,11 +18,15 @@ const CookieConsent = () => {
   const handleAccept = () => {
     localStorage.setItem(COOKIE_KEY, "accepted");
     setVisible(false);
+    window.dispatchEvent(new Event("cookie-consent-change"));
   };
 
   const handleReject = () => {
+    // Remove non-essential localStorage items
+    localStorage.removeItem("solara_visitor_id");
     localStorage.setItem(COOKIE_KEY, "rejected");
     setVisible(false);
+    window.dispatchEvent(new Event("cookie-consent-change"));
   };
 
   if (!visible) return null;
@@ -33,8 +37,8 @@ const CookieConsent = () => {
         <div className="rounded-2xl border border-border/50 bg-card/95 backdrop-blur-md p-5 shadow-lg">
           <p className="font-body text-sm text-foreground/80 mb-4 leading-relaxed">
             {lang === "lv"
-              ? "Mēs izmantojam sīkdatnes, lai nodrošinātu vietnes darbību un uzlabotu jūsu pieredzi. Turpinot lietot vietni, jūs piekrītat sīkdatņu izmantošanai."
-              : "We use cookies to ensure the website functions properly and to improve your experience. By continuing to use the site, you agree to our use of cookies."}
+              ? "Mēs izmantojam sīkdatnes, lai nodrošinātu vietnes darbību un uzlabotu jūsu pieredzi. Noraidot sīkdatnes, YouTube video un vērtējumu funkcija nebūs pieejama."
+              : "We use cookies to ensure the website functions properly and to improve your experience. Rejecting cookies will disable YouTube videos and the rating feature."}
           </p>
           <div className="flex items-center gap-3">
             <button
