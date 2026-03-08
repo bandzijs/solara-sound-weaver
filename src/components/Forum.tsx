@@ -26,13 +26,14 @@ interface Comment {
 
 const EmailOtpForm = ({ context }: { context: "topic" | "reply" }) => {
   const { lang } = useLanguage();
-  const { signInWithOtp } = useAuth();
+  const { signInWithOtp, verifyOtp } = useAuth();
   const [email, setEmail] = useState("");
-  const [sent, setSent] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+  const [step, setStep] = useState<"email" | "code">("email");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim()) return;
     setSending(true);
@@ -43,23 +44,68 @@ const EmailOtpForm = ({ context }: { context: "topic" | "reply" }) => {
     if (otpError) {
       setError(otpError.message);
     } else {
-      setSent(true);
+      setStep("code");
     }
     setSending(false);
   };
 
-  if (sent) {
+  const handleVerifyCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!otpCode.trim() || otpCode.length !== 6) return;
+    setSending(true);
+    setError("");
+
+    const { error: verifyError } = await verifyOtp(email.trim(), otpCode.trim());
+
+    if (verifyError) {
+      setError(verifyError.message);
+    }
+    setSending(false);
+  };
+
+  if (step === "code") {
     return (
-      <div className="w-full py-4 px-5 rounded-xl border border-primary/30 bg-primary/5 text-center">
-        <Mail className="w-5 h-5 text-primary mx-auto mb-2" />
-        <p className="font-body text-sm text-primary tracking-wide">
-          {lang === "lv" ? "Pārbaudiet savu e-pastu!" : "Check your email!"}
-        </p>
-        <p className="font-body text-xs text-muted-foreground mt-1">
-          {lang === "lv"
-            ? "Mēs nosūtījām pieteikšanās saiti uz jūsu e-pastu."
-            : "We sent a login link to your email."}
-        </p>
+      <div className="w-full space-y-3">
+        <div className="py-4 px-5 rounded-xl border border-primary/30 bg-primary/5 text-center">
+          <Mail className="w-5 h-5 text-primary mx-auto mb-2" />
+          <p className="font-body text-sm text-primary tracking-wide">
+            {lang === "lv" ? "Kods nosūtīts!" : "Code sent!"}
+          </p>
+          <p className="font-body text-xs text-muted-foreground mt-1">
+            {lang === "lv"
+              ? `Pārbaudiet ${email} un ievadiet 6-ciparu kodu.`
+              : `Check ${email} and enter the 6-digit code.`}
+          </p>
+        </div>
+        <form onSubmit={handleVerifyCode} className="flex gap-2">
+          <input
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            maxLength={6}
+            required
+            value={otpCode}
+            onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+            placeholder={lang === "lv" ? "6-ciparu kods" : "6-digit code"}
+            autoFocus
+            className="flex-1 bg-card/40 border border-border rounded-lg px-4 py-2.5 font-body text-foreground text-sm text-center tracking-[0.3em] focus:border-primary focus:outline-none transition-colors"
+          />
+          <button
+            type="submit"
+            disabled={sending || otpCode.length !== 6}
+            className="px-5 py-2.5 rounded-lg border border-primary text-primary font-body text-sm tracking-widest hover:bg-primary hover:text-primary-foreground transition-all duration-300 disabled:opacity-50 whitespace-nowrap"
+          >
+            {sending ? "..." : lang === "lv" ? "Apstiprināt" : "Verify"}
+          </button>
+        </form>
+        <button
+          type="button"
+          onClick={() => { setStep("email"); setOtpCode(""); setError(""); }}
+          className="text-xs font-body text-muted-foreground hover:text-primary transition-colors"
+        >
+          {lang === "lv" ? "← Mainīt e-pastu" : "← Change email"}
+        </button>
+        {error && <p className="font-body text-xs text-destructive">{error}</p>}
       </div>
     );
   }
@@ -74,7 +120,7 @@ const EmailOtpForm = ({ context }: { context: "topic" | "reply" }) => {
         : "Enter email to reply";
 
   return (
-    <form onSubmit={handleSubmit} className="w-full space-y-2">
+    <form onSubmit={handleSendCode} className="w-full space-y-2">
       <p className="font-body text-xs text-muted-foreground tracking-wide">{label}</p>
       <div className="flex gap-2">
         <input
@@ -90,7 +136,7 @@ const EmailOtpForm = ({ context }: { context: "topic" | "reply" }) => {
           disabled={sending || !email.trim()}
           className="px-5 py-2.5 rounded-lg border border-primary text-primary font-body text-sm tracking-widest hover:bg-primary hover:text-primary-foreground transition-all duration-300 disabled:opacity-50 whitespace-nowrap"
         >
-          {sending ? "..." : lang === "lv" ? "Nosūtīt saiti" : "Send link"}
+          {sending ? "..." : lang === "lv" ? "Nosūtīt kodu" : "Send code"}
         </button>
       </div>
       {error && <p className="font-body text-xs text-destructive">{error}</p>}
