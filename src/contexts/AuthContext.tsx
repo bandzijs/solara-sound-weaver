@@ -1,4 +1,3 @@
-// Auth context – Google OAuth with dynamic redirectTo (2026-03-08)
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import type { User, Session } from "@supabase/supabase-js";
@@ -12,7 +11,7 @@ interface AuthContextType {
   isAdmin: boolean;
   displayName: string | null;
   avatarUrl: string | null;
-  signInWithGoogle: () => Promise<void>;
+  signInWithOtp: (email: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
 }
 
@@ -39,15 +38,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => subscription.unsubscribe();
   }, []);
 
-  const signInWithGoogle = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
+  const signInWithOtp = async (email: string) => {
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        emailRedirectTo: window.location.origin,
       },
     });
-
-    if (error) console.error("OAuth error:", error);
+    return { error: error as Error | null };
   };
 
   const signOut = async () => {
@@ -55,11 +53,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const isAdmin = user?.email === ADMIN_EMAIL;
-  const displayName = user?.user_metadata?.full_name ?? user?.user_metadata?.name ?? null;
+  const displayName = user?.user_metadata?.full_name ?? user?.user_metadata?.name ?? user?.email ?? null;
   const avatarUrl = user?.user_metadata?.avatar_url ?? null;
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, isAdmin, displayName, avatarUrl, signInWithGoogle, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, isAdmin, displayName, avatarUrl, signInWithOtp, signOut }}>
       {children}
     </AuthContext.Provider>
   );

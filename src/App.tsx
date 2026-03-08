@@ -9,21 +9,12 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import Index from "./pages/Index";
 import AdminPanel from "./pages/AdminPanel";
-import AuthCallback from "./pages/AuthCallback";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
 const App = () => {
   useEffect(() => {
-    const hash = window.location.hash;
-
-    if (hash && hash.includes("access_token")) {
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        console.log("Token in URL, session:", session?.user?.email);
-      });
-    }
-
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         console.log("Session found:", session.user.email);
@@ -48,8 +39,7 @@ const App = () => {
             <Sonner />
             <BrowserRouter>
               <Routes>
-              <Route path="/" element={<Index />} />
-                <Route path="/auth/callback" element={<AuthCallback />} />
+                <Route path="/" element={<Index />} />
                 <Route path="/admin" element={<AdminPanel />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
