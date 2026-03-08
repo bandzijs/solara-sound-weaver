@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/lib/supabase";
 import { songs as staticSongs, styleKeys, type Song } from "@/data/songs";
+import { Search, ChevronLeft, ChevronRight } from "lucide-react";
 
-const SONGS_PER_PAGE = 6;
+const SONGS_PER_PAGE = 9;
 
 interface DbSong {
   id: string;
@@ -22,8 +23,10 @@ interface DbSong {
 const MusicGallery = () => {
   const { lang, t } = useLanguage();
   const [filter, setFilter] = useState<string>("all");
-  const [visibleCount, setVisibleCount] = useState(SONGS_PER_PAGE);
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
   const [allSongs, setAllSongs] = useState<Song[]>(staticSongs);
+  const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const fetchDbSongs = async () => {
@@ -52,21 +55,58 @@ const MusicGallery = () => {
     fetchDbSongs();
   }, []);
 
-  const filtered = filter === "all" ? allSongs : allSongs.filter((s) => s.style === filter);
-  const visible = filtered.slice(0, visibleCount);
-  const hasMore = visibleCount < filtered.length;
+  const filtered = useMemo(() => {
+    let result = filter === "all" ? allSongs : allSongs.filter((s) => s.style === filter);
+    if (search.trim()) {
+      const q = search.toLowerCase().trim();
+      result = result.filter((s) =>
+        s.titleLV.toLowerCase().includes(q) ||
+        s.titleEN.toLowerCase().includes(q) ||
+        s.poemLV.toLowerCase().includes(q) ||
+        s.poemEN.toLowerCase().includes(q)
+      );
+    }
+    return result;
+  }, [allSongs, filter, search]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / SONGS_PER_PAGE));
+  const safePage = Math.min(page, totalPages);
+  const startIdx = (safePage - 1) * SONGS_PER_PAGE;
+  const visible = filtered.slice(startIdx, startIdx + SONGS_PER_PAGE);
+
+  const changePage = (newPage: number) => {
+    setPage(newPage);
+    sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  // Reset page when filter or search changes
+  useEffect(() => { setPage(1); }, [filter, search]);
 
   return (
-    <section id="music" className="relative z-10 py-24 px-4">
+    <section id="music" ref={sectionRef} className="relative z-10 py-24 px-4">
       <div className="container mx-auto max-w-5xl">
         <h2 className="font-heading text-3xl md:text-4xl text-center text-foreground glow-text mb-12 tracking-wider">
           {t.music.heading}
         </h2>
 
+        {/* Search bar */}
+        <div className="flex justify-center mb-6">
+          <div className="relative w-full max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={lang === "lv" ? "Meklēt dziesmu..." : "Search songs..."}
+              className="w-full pl-10 pr-4 py-2.5 rounded-full text-sm font-body tracking-wide bg-card/40 border border-border text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none transition-colors"
+            />
+          </div>
+        </div>
+
         {/* Style filters */}
         <div className="flex flex-wrap justify-center gap-3 mb-4">
           <button
-            onClick={() => { setFilter("all"); setVisibleCount(SONGS_PER_PAGE); }}
+            onClick={() => setFilter("all")}
             className={`px-4 py-1.5 rounded-full text-xs font-body tracking-widest border transition-all duration-300 ${
               filter === "all"
                 ? "border-primary text-primary glow-box"
@@ -78,7 +118,7 @@ const MusicGallery = () => {
           {styleKeys.map((style) => (
             <button
               key={style}
-              onClick={() => { setFilter(style); setVisibleCount(SONGS_PER_PAGE); }}
+              onClick={() => setFilter(style)}
               className={`px-4 py-1.5 rounded-full text-xs font-body tracking-widest border transition-all duration-300 ${
                 filter === style
                   ? "border-primary text-primary glow-box"
@@ -93,8 +133,8 @@ const MusicGallery = () => {
         {/* Song count */}
         <p className="text-center text-xs font-body text-muted-foreground tracking-widest mb-10">
           {lang === "lv"
-            ? `Rāda ${visible.length} no ${filtered.length} dziesmām`
-            : `Showing ${visible.length} of ${filtered.length} songs`}
+            ? `Rāda ${filtered.length === 0 ? 0 : startIdx + 1}-${startIdx + visible.length} no ${filtered.length} dziesmām`
+            : `Showing ${filtered.length === 0 ? 0 : startIdx + 1}-${startIdx + visible.length} of ${filtered.length} songs`}
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -140,13 +180,35 @@ const MusicGallery = () => {
           ))}
         </div>
 
-        {hasMore && (
-          <div className="flex justify-center mt-10">
+        {filtered.length === 0 && (
+          <p className="text-center text-muted-foreground font-body text-sm py-12">
+            {lang === "lv" ? "Neviena dziesma nav atrasta" : "No songs found"}
+          </p>
+        )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-4 mt-10">
             <button
-              onClick={() => setVisibleCount((prev) => prev + SONGS_PER_PAGE)}
-              className="px-6 py-2.5 rounded-full text-sm font-body tracking-widest border border-primary text-primary hover:bg-primary/10 transition-all duration-300 glow-box-hover"
+              onClick={() => changePage(safePage - 1)}
+              disabled={safePage <= 1}
+              className="flex items-center gap-1 px-4 py-2 rounded-full text-sm font-body tracking-widest border border-border text-muted-foreground hover:border-primary/50 hover:text-primary transition-all duration-300 disabled:opacity-30 disabled:pointer-events-none"
             >
-              {lang === "lv" ? "Ielādēt vairāk" : "Load more"}
+              <ChevronLeft className="w-4 h-4" />
+              {lang === "lv" ? "Iepriekšējā" : "Previous"}
+            </button>
+            <span className="text-xs font-body text-muted-foreground tracking-widest">
+              {lang === "lv"
+                ? `Lapa ${safePage} no ${totalPages}`
+                : `Page ${safePage} of ${totalPages}`}
+            </span>
+            <button
+              onClick={() => changePage(safePage + 1)}
+              disabled={safePage >= totalPages}
+              className="flex items-center gap-1 px-4 py-2 rounded-full text-sm font-body tracking-widest border border-border text-muted-foreground hover:border-primary/50 hover:text-primary transition-all duration-300 disabled:opacity-30 disabled:pointer-events-none"
+            >
+              {lang === "lv" ? "Nākamā" : "Next"}
+              <ChevronRight className="w-4 h-4" />
             </button>
           </div>
         )}
