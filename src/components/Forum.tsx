@@ -43,7 +43,11 @@ const EmailOtpForm = ({ context }: { context: "topic" | "reply" }) => {
     const { error: otpError } = await signInWithOtp(email.trim());
 
     if (otpError) {
-      setError(otpError.message);
+      if (otpError.message?.includes("429") || otpError.message?.toLowerCase().includes("rate") || (otpError as any)?.status === 429) {
+        setError(lang === "lv" ? "Pārāk daudz mēģinājumu. Lūdzu uzgaidi 10 minūtes pirms mēģini vēlreiz." : "Too many attempts. Please wait 10 minutes before trying again.");
+      } else {
+        setError(otpError.message);
+      }
     } else {
       setStep("code");
     }
