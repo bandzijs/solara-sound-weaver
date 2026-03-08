@@ -388,6 +388,7 @@ const AdminPanel = () => {
             </div>
           </div>
         )}
+        {tab === "community" && <CommunityModeration />}
       </main>
     </div>
   );
