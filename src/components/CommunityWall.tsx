@@ -46,24 +46,6 @@ const CommunityWall = () => {
           {t.community.heading}
         </h2>
 
-        <div className="flex justify-end mb-4">
-          {user ? (
-            <button
-              onClick={handleLogout}
-              className="text-xs font-body text-muted-foreground hover:text-foreground transition-colors"
-            >
-              {user.user_metadata?.full_name || user.email} — Log out
-            </button>
-          ) : (
-            <button
-              onClick={handleGoogleLogin}
-              className="px-4 py-2 rounded-lg border border-primary text-primary font-body text-xs tracking-widest hover:bg-primary hover:text-primary-foreground transition-all duration-300"
-            >
-              Sign in with Google
-            </button>
-          )}
-        </div>
-
         <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 mb-12">
           <input
             type="text"
