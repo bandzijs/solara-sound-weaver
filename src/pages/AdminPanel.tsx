@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAdmin } from "@/contexts/AdminContext";
 import { supabase } from "@/lib/supabase";
-import { Trash2, Plus, ArrowLeft, Music, MessageCircle, Pencil } from "lucide-react";
+import { Trash2, Plus, ArrowLeft, Music, MessageCircle, Pencil, Users } from "lucide-react";
+import CommunityModeration from "@/components/admin/CommunityModeration";
 
 interface SongRow {
   id: string;
