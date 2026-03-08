@@ -15,7 +15,14 @@ const queryClient = new QueryClient();
 
 const App = () => {
   useEffect(() => {
-    // Handle OAuth callback tokens in URL hash (#access_token=...)
+    const hash = window.location.hash;
+
+    if (hash && hash.includes("access_token")) {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        console.log("Token in URL, session:", session?.user?.email);
+      });
+    }
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         console.log("Session found:", session.user.email);
