@@ -39,10 +39,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const signInWithGoogle = async () => {
-    await supabase.auth.signInWithOAuth({
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: "https://solaraflames.com" },
+      options: {
+        redirectTo: window.location.origin,
+        queryParams: {
+          access_type: "offline",
+          prompt: "consent",
+        },
+      },
     });
+
+    if (error) console.error("OAuth error:", error);
   };
 
   const signOut = async () => {
