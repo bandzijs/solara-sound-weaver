@@ -8,26 +8,8 @@ const CommunityWall = () => {
   const [name, setName] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
-
   useEffect(() => {
     fetchComments();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        setName(session.user.user_metadata?.full_name || session.user.email || "");
-      }
-    });
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        setName(session.user.user_metadata?.full_name || session.user.email || "");
-      }
-    });
-
-    return () => subscription.unsubscribe();
   }, []);
 
   const fetchComments = async () => {
