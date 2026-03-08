@@ -397,6 +397,7 @@ const Forum = () => {
   // ── Topic list view ──
   return (
     <section id="community" className="relative z-10 py-24 px-4">
+      <NicknameModal open={needsNickname} onSaved={setNickname} />
       <div className="container mx-auto max-w-2xl">
         <h2 className="font-heading text-3xl md:text-4xl text-center text-foreground glow-text mb-12 tracking-wider">
           {lang === "lv" ? "Kopiena" : "Community"}
