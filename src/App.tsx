@@ -9,7 +9,6 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import Index from "./pages/Index";
 import AdminPanel from "./pages/AdminPanel";
-import AuthCallback from "./pages/AuthCallback";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
