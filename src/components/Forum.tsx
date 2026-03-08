@@ -92,7 +92,7 @@ const EmailOtpForm = ({ context }: { context: "topic" | "reply" }) => {
           />
           <button
             type="submit"
-            disabled={sending || otpCode.length !== 6}
+            disabled={sending || otpCode.length < 6 || otpCode.length > 8}
             className="px-5 py-2.5 rounded-lg border border-primary text-primary font-body text-sm tracking-widest hover:bg-primary hover:text-primary-foreground transition-all duration-300 disabled:opacity-50 whitespace-nowrap"
           >
             {sending ? "..." : lang === "lv" ? "Apstiprināt" : "Verify"}
