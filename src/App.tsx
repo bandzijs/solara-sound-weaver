@@ -15,30 +15,17 @@ const queryClient = new QueryClient();
 
 const App = () => {
   useEffect(() => {
-    const url = new URL(window.location.href);
-    const code = url.searchParams.get("code");
-
-    if (code) {
-      supabase.auth.exchangeCodeForSession(code)
-        .then(({ data, error }) => {
-          if (error) {
-            console.error("OAuth code exchange failed:", error);
-            return;
-          }
-          console.log("OAuth code exchanged successfully:", data.session);
-          url.searchParams.delete("code");
-          url.searchParams.delete("state");
-          window.history.replaceState({}, document.title, `${url.pathname}${url.search}${url.hash}`);
-        })
-        .catch((error) => {
-          console.error("Unexpected OAuth exchange error:", error);
-        });
-    }
+    // Handle OAuth callback tokens in URL hash (#access_token=...)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        console.log("Session found:", session.user.email);
+      }
+    });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("Auth event:", event, session);
+      console.log("Auth change:", event, session?.user?.email);
     });
 
     return () => subscription.unsubscribe();
