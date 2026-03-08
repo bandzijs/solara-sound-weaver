@@ -268,7 +268,11 @@ const Forum = () => {
             )}
           </div>
 
-          {user ? (
+          {authLoading || !authReady ? (
+            <p className="text-center text-muted-foreground font-body text-sm py-3">
+              {lang === "lv" ? "Pārbauda pierakstīšanos..." : "Checking sign-in..."}
+            </p>
+          ) : user ? (
             <form onSubmit={handlePostComment} className="flex gap-3">
               <input
                 type="text"
