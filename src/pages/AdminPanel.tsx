@@ -223,6 +223,16 @@ const AdminPanel = () => {
             >
               <Link2 className="w-3.5 h-3.5" /> Saites
             </button>
+            <button
+              onClick={() => setTab("banners")}
+              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-body tracking-widest border transition-all ${
+                tab === "banners"
+                  ? "border-primary text-primary glow-box"
+                  : "border-border text-muted-foreground hover:border-primary/50"
+              }`}
+            >
+              <ImageIcon className="w-3.5 h-3.5" /> Baneri
+            </button>
           </div>
         </div>
       </header>
