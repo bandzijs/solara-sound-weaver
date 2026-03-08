@@ -77,14 +77,6 @@ const AdminPanel = () => {
     if (data) setSongs(data);
   };
 
-  const fetchComments = async () => {
-    const { data } = await supabase
-      .from("comments")
-      .select("id, name, message, created_at")
-      .eq("is_deleted", false)
-      .order("created_at", { ascending: false });
-    if (data) setComments(data);
-  };
 
   const handleEditSong = (song: SongRow) => {
     setForm({
