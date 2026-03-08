@@ -1,17 +1,33 @@
 import { useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { supabase } from "@/lib/supabase";
 
 const SubmitForm = () => {
   const { t } = useLanguage();
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", text: "", mood: "" });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Supabase integration
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 5000);
-    setForm({ name: "", email: "", text: "", mood: "" });
+    setSubmitting(true);
+
+    const { error } = await supabase
+      .from("submissions")
+      .insert([{
+        name: form.name.trim(),
+        email: form.email.trim(),
+        poem_text: form.text.trim(),
+        mood: form.mood,
+      }]);
+
+    setSubmitting(false);
+
+    if (!error) {
+      setSubmitted(true);
+      setTimeout(() => setSubmitted(false), 5000);
+      setForm({ name: "", email: "", text: "", mood: "" });
+    }
   };
 
   return (
@@ -81,9 +97,10 @@ const SubmitForm = () => {
             </div>
             <button
               type="submit"
-              className="w-full py-3 rounded-full bg-primary text-primary-foreground font-body text-sm tracking-widest hover:bg-primary/80 transition-all duration-500 glow-box"
+              disabled={submitting}
+              className="w-full py-3 rounded-full bg-primary text-primary-foreground font-body text-sm tracking-widest hover:bg-primary/80 transition-all duration-500 glow-box disabled:opacity-50"
             >
-              {t.form.submit}
+              {submitting ? "..." : t.form.submit}
             </button>
           </form>
         )}
