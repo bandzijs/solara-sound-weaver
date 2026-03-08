@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAdmin } from "@/contexts/AdminContext";
 import { supabase } from "@/lib/supabase";
-import { Trash2, Plus, ArrowLeft, Music, MessageCircle } from "lucide-react";
+import { Trash2, Plus, ArrowLeft, Music, MessageCircle, Pencil } from "lucide-react";
 
 interface SongRow {
   id: string;
@@ -57,6 +57,7 @@ const AdminPanel = () => {
   const [comments, setComments] = useState<CommentRow[]>([]);
   const [form, setForm] = useState(emptyForm);
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   const [password, setPassword] = useState("");
@@ -86,6 +87,23 @@ const AdminPanel = () => {
     if (data) setComments(data);
   };
 
+  const handleEditSong = (song: SongRow) => {
+    setForm({
+      title_lv: song.title_lv,
+      title_en: song.title_en,
+      youtube_id: song.youtube_id,
+      style: song.style,
+      badge_lv: song.badge_lv,
+      badge_en: song.badge_en,
+      poem_lv: song.poem_lv,
+      poem_en: song.poem_en,
+      author_note_lv: song.author_note_lv || "",
+      author_note_en: song.author_note_en || "",
+    });
+    setEditingId(song.id);
+    setShowForm(true);
+  };
+
   const handleSaveSong = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -101,15 +119,23 @@ const AdminPanel = () => {
       author_note_lv: form.author_note_lv || null,
       author_note_en: form.author_note_en || null,
     };
-    console.log("[AdminPanel] Saving song:", payload);
-    const { data, error } = await supabase.from("songs").insert([payload]).select();
+
+    let error;
+    if (editingId) {
+      console.log("[AdminPanel] Updating song:", editingId, payload);
+      ({ error } = await supabase.from("songs").update(payload).eq("id", editingId));
+    } else {
+      console.log("[AdminPanel] Saving song:", payload);
+      ({ error } = await supabase.from("songs").insert([payload]));
+    }
+
     if (error) {
       console.error("[AdminPanel] Save error:", error);
       alert(`Error saving song: ${error.message}`);
     } else {
-      console.log("[AdminPanel] Song saved successfully:", data);
       setForm(emptyForm);
       setShowForm(false);
+      setEditingId(null);
       fetchSongs();
     }
     setSaving(false);
@@ -219,7 +245,7 @@ const AdminPanel = () => {
                 Songs ({songs.length})
               </h2>
               <button
-                onClick={() => setShowForm(!showForm)}
+                onClick={() => { setEditingId(null); setForm(emptyForm); setShowForm(!showForm); }}
                 className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-primary-foreground font-body text-sm tracking-widest hover:bg-primary/80 transition-all"
               >
                 <Plus className="w-4 h-4" /> Add Song
@@ -293,9 +319,9 @@ const AdminPanel = () => {
 
                 <div className="flex gap-3 pt-2">
                   <button type="submit" disabled={saving} className="px-6 py-2.5 rounded-lg bg-primary text-primary-foreground font-body text-sm tracking-widest hover:bg-primary/80 transition-all disabled:opacity-50">
-                    {saving ? "Saving..." : "Save Song"}
+                    {saving ? "Saving..." : editingId ? "Update Song" : "Save Song"}
                   </button>
-                  <button type="button" onClick={() => setShowForm(false)} className="px-6 py-2.5 rounded-lg border border-border text-muted-foreground font-body text-sm hover:text-foreground transition-colors">
+                  <button type="button" onClick={() => { setShowForm(false); setEditingId(null); setForm(emptyForm); }} className="px-6 py-2.5 rounded-lg border border-border text-muted-foreground font-body text-sm hover:text-foreground transition-colors">
                     Cancel
                   </button>
                 </div>
@@ -314,9 +340,14 @@ const AdminPanel = () => {
                       <span className="text-[10px] font-body tracking-widest text-muted-foreground">{song.badge_lv}</span>
                     </div>
                   </div>
-                  <button onClick={() => handleDeleteSong(song.id)} className="text-muted-foreground hover:text-destructive transition-colors ml-3">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  <div className="flex items-center gap-1 ml-3">
+                    <button onClick={() => handleEditSong(song)} className="text-muted-foreground hover:text-primary transition-colors">
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => handleDeleteSong(song.id)} className="text-muted-foreground hover:text-destructive transition-colors">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               ))}
               {songs.length === 0 && <p className="text-center text-muted-foreground font-body text-sm py-8">No songs yet</p>}
