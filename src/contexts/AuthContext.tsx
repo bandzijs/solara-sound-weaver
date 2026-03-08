@@ -12,6 +12,7 @@ interface AuthContextType {
   displayName: string | null;
   avatarUrl: string | null;
   signInWithOtp: (email: string) => Promise<{ error: Error | null }>;
+  verifyOtp: (email: string, token: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
 }
 
