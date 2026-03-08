@@ -10,8 +10,10 @@ const HeroSection = () => {
 
       <img
         src="https://i.postimg.cc/TYMZgDs6/Chat-GPT-Image-2025-g-28-okt-11-22-58.png"
-        alt="Solara Music Vibes"
+        alt="Solara Music Vibes logo — poetry transformed into AI music"
         className="w-full max-w-[200px] rounded-full mb-4"
+        width={200}
+        height={200}
         style={{ filter: "drop-shadow(0 0 25px rgba(77,217,224,0.8))" }}
       />
 
