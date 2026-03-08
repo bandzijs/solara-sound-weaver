@@ -82,11 +82,11 @@ const EmailOtpForm = ({ context }: { context: "topic" | "reply" }) => {
             type="text"
             inputMode="numeric"
             pattern="[0-9]*"
-            maxLength={6}
+            maxLength={8}
             required
             value={otpCode}
-            onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-            placeholder={lang === "lv" ? "6-ciparu kods" : "6-digit code"}
+            onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 8))}
+            placeholder={lang === "lv" ? "Kods" : "Code"}
             autoFocus
             className="flex-1 bg-card/40 border border-border rounded-lg px-4 py-2.5 font-body text-foreground text-sm text-center tracking-[0.3em] focus:border-primary focus:outline-none transition-colors"
           />
