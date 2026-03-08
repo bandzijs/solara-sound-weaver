@@ -8,13 +8,17 @@ export default function AuthCallback() {
   useEffect(() => {
     supabase.auth.exchangeCodeForSession(
       window.location.search
-    ).then(({ data, error }) => {
-      console.log('Callback:', data?.session?.user?.email, error);
+    ).then(async ({ data, error }) => {
+      console.log('Session after exchange:', data?.session?.user?.email, error);
+
       if (data?.session) {
-        navigate('/', { replace: true });
-      } else {
-        navigate('/', { replace: true });
+        await supabase.auth.setSession({
+          access_token: data.session.access_token,
+          refresh_token: data.session.refresh_token,
+        });
       }
+
+      navigate('/', { replace: true });
     });
   }, [navigate]);
 
