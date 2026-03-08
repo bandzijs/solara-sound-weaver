@@ -312,50 +312,63 @@ const Forum = () => {
         </h2>
 
         {/* Create topic */}
-        {user ? (
-          showNewTopic ? (
-            <form onSubmit={handleCreateTopic} className="mb-8 p-5 rounded-2xl border border-border/30 bg-card/20 backdrop-blur-sm space-y-3">
-              <input
-                type="text"
-                value={newTopicTitle}
-                onChange={(e) => setNewTopicTitle(e.target.value)}
-                placeholder={lang === "lv" ? "Tēmas nosaukums..." : "Topic title..."}
-                autoFocus
-                className="w-full bg-card/40 border border-border rounded-lg px-4 py-2.5 font-body text-foreground text-sm focus:border-primary focus:outline-none transition-colors"
-              />
-              <textarea
-                value={newTopicMessage}
-                onChange={(e) => setNewTopicMessage(e.target.value)}
-                placeholder={lang === "lv" ? "Pirmā ziņa..." : "First message..."}
-                rows={3}
-                className="w-full bg-card/40 border border-border rounded-lg px-4 py-2.5 font-body text-foreground text-sm focus:border-primary focus:outline-none transition-colors resize-none"
-              />
-              <div className="flex gap-3">
-                <button
-                  type="submit"
-                  disabled={saving || !newTopicTitle.trim() || !newTopicMessage.trim()}
-                  className="px-5 py-2 rounded-lg bg-primary text-primary-foreground font-body text-sm tracking-widest hover:bg-primary/80 transition-all disabled:opacity-50"
-                >
-                  {saving ? "..." : lang === "lv" ? "Izveidot" : "Create"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => { setShowNewTopic(false); setNewTopicTitle(""); setNewTopicMessage(""); }}
-                  className="px-5 py-2 rounded-lg border border-border text-muted-foreground font-body text-sm hover:text-foreground transition-colors"
-                >
-                  {lang === "lv" ? "Atcelt" : "Cancel"}
-                </button>
-              </div>
-            </form>
-          ) : (
-            <button
-              onClick={() => setShowNewTopic(true)}
-              className="mb-8 w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-border/50 text-muted-foreground font-body text-sm hover:border-primary hover:text-primary transition-all"
-            >
-              <Plus className="w-4 h-4" />
-              {lang === "lv" ? "Izveidot jaunu tēmu" : "Create new topic"}
-            </button>
-          )
+        {authLoading || !authReady ? (
+          <p className="mb-8 text-center text-muted-foreground font-body text-sm">
+            {lang === "lv" ? "Pārbauda pierakstīšanos..." : "Checking sign-in..."}
+          </p>
+        ) : user ? (
+          <div className="mb-8">
+            <div className="flex items-center gap-2 mb-3">
+              <AvatarBubble url={avatarUrl} name={displayName || user.email || "User"} />
+              <span className="text-xs font-body text-muted-foreground tracking-wide truncate">
+                {displayName || user.email}
+              </span>
+            </div>
+
+            {showNewTopic ? (
+              <form onSubmit={handleCreateTopic} className="p-5 rounded-2xl border border-border/30 bg-card/20 backdrop-blur-sm space-y-3">
+                <input
+                  type="text"
+                  value={newTopicTitle}
+                  onChange={(e) => setNewTopicTitle(e.target.value)}
+                  placeholder={lang === "lv" ? "Tēmas nosaukums..." : "Topic title..."}
+                  autoFocus
+                  className="w-full bg-card/40 border border-border rounded-lg px-4 py-2.5 font-body text-foreground text-sm focus:border-primary focus:outline-none transition-colors"
+                />
+                <textarea
+                  value={newTopicMessage}
+                  onChange={(e) => setNewTopicMessage(e.target.value)}
+                  placeholder={lang === "lv" ? "Pirmā ziņa..." : "First message..."}
+                  rows={3}
+                  className="w-full bg-card/40 border border-border rounded-lg px-4 py-2.5 font-body text-foreground text-sm focus:border-primary focus:outline-none transition-colors resize-none"
+                />
+                <div className="flex gap-3">
+                  <button
+                    type="submit"
+                    disabled={saving || !newTopicTitle.trim() || !newTopicMessage.trim()}
+                    className="px-5 py-2 rounded-lg bg-primary text-primary-foreground font-body text-sm tracking-widest hover:bg-primary/80 transition-all disabled:opacity-50"
+                  >
+                    {saving ? "..." : lang === "lv" ? "Izveidot" : "Create"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setShowNewTopic(false); setNewTopicTitle(""); setNewTopicMessage(""); }}
+                    className="px-5 py-2 rounded-lg border border-border text-muted-foreground font-body text-sm hover:text-foreground transition-colors"
+                  >
+                    {lang === "lv" ? "Atcelt" : "Cancel"}
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <button
+                onClick={() => setShowNewTopic(true)}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-border/50 text-muted-foreground font-body text-sm hover:border-primary hover:text-primary transition-all"
+              >
+                <Plus className="w-4 h-4" />
+                {lang === "lv" ? "Izveidot jaunu tēmu" : "Create new topic"}
+              </button>
+            )}
+          </div>
         ) : (
           <button
             onClick={signInWithGoogle}
