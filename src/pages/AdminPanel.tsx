@@ -245,7 +245,7 @@ const AdminPanel = () => {
                 Songs ({songs.length})
               </h2>
               <button
-                onClick={() => setShowForm(!showForm)}
+                onClick={() => { setEditingId(null); setForm(emptyForm); setShowForm(!showForm); }}
                 className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-primary-foreground font-body text-sm tracking-widest hover:bg-primary/80 transition-all"
               >
                 <Plus className="w-4 h-4" /> Add Song
