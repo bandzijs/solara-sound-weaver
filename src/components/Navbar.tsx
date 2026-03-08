@@ -1,7 +1,8 @@
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAdmin } from "@/contexts/AdminContext";
-import AdminLogin from "@/components/AdminLogin";
 import { Shield } from "lucide-react";
+import { Link } from "react-router-dom";
+import AdminLogin from "@/components/AdminLogin";
 
 const Navbar = () => {
   const { lang, t, toggleLang } = useLanguage();
@@ -35,10 +36,15 @@ const Navbar = () => {
 
         <div className="flex items-center gap-3">
           {isAdmin && (
-            <span className="flex items-center gap-1 text-xs font-body text-primary border border-primary/30 rounded-full px-2.5 py-1">
-              <Shield className="w-3 h-3" />
-              Admin
-            </span>
+            <>
+              <Link
+                to="/admin"
+                className="flex items-center gap-1 text-xs font-body text-primary border border-primary/30 rounded-full px-2.5 py-1 hover:bg-primary/10 transition-colors"
+              >
+                <Shield className="w-3 h-3" />
+                Admin
+              </Link>
+            </>
           )}
           <AdminLogin />
           <button
