@@ -89,7 +89,7 @@ const AdminPanel = () => {
   const handleSaveSong = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    const { error } = await supabase.from("songs").insert([{
+    const payload = {
       title_lv: form.title_lv,
       title_en: form.title_en,
       youtube_id: form.youtube_id,
@@ -100,8 +100,14 @@ const AdminPanel = () => {
       poem_en: form.poem_en,
       author_note_lv: form.author_note_lv || null,
       author_note_en: form.author_note_en || null,
-    }]);
-    if (!error) {
+    };
+    console.log("[AdminPanel] Saving song:", payload);
+    const { data, error } = await supabase.from("songs").insert([payload]).select();
+    if (error) {
+      console.error("[AdminPanel] Save error:", error);
+      alert(`Error saving song: ${error.message}`);
+    } else {
+      console.log("[AdminPanel] Song saved successfully:", data);
       setForm(emptyForm);
       setShowForm(false);
       fetchSongs();
