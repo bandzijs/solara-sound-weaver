@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
-import { MessageSquare, Plus, ArrowLeft, Trash2, LogIn } from "lucide-react";
+import { MessageSquare, Plus, ArrowLeft, Trash2, Mail } from "lucide-react";
 
 interface Topic {
   id: string;
@@ -24,15 +24,88 @@ interface Comment {
   avatar_url?: string;
 }
 
+const EmailOtpForm = ({ context }: { context: "topic" | "reply" }) => {
+  const { lang } = useLanguage();
+  const { signInWithOtp } = useAuth();
+  const [email, setEmail] = useState("");
+  const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+    setSending(true);
+    setError("");
+
+    const { error: otpError } = await signInWithOtp(email.trim());
+
+    if (otpError) {
+      setError(otpError.message);
+    } else {
+      setSent(true);
+    }
+    setSending(false);
+  };
+
+  if (sent) {
+    return (
+      <div className="w-full py-4 px-5 rounded-xl border border-primary/30 bg-primary/5 text-center">
+        <Mail className="w-5 h-5 text-primary mx-auto mb-2" />
+        <p className="font-body text-sm text-primary tracking-wide">
+          {lang === "lv" ? "Pārbaudiet savu e-pastu!" : "Check your email!"}
+        </p>
+        <p className="font-body text-xs text-muted-foreground mt-1">
+          {lang === "lv"
+            ? "Mēs nosūtījām pieteikšanās saiti uz jūsu e-pastu."
+            : "We sent a login link to your email."}
+        </p>
+      </div>
+    );
+  }
+
+  const label =
+    context === "topic"
+      ? lang === "lv"
+        ? "Ievadiet e-pastu, lai izveidotu tēmu"
+        : "Enter email to create a topic"
+      : lang === "lv"
+        ? "Ievadiet e-pastu, lai atbildētu"
+        : "Enter email to reply";
+
+  return (
+    <form onSubmit={handleSubmit} className="w-full space-y-2">
+      <p className="font-body text-xs text-muted-foreground tracking-wide">{label}</p>
+      <div className="flex gap-2">
+        <input
+          type="email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="you@example.com"
+          className="flex-1 bg-card/40 border border-border rounded-lg px-4 py-2.5 font-body text-foreground text-sm focus:border-primary focus:outline-none transition-colors"
+        />
+        <button
+          type="submit"
+          disabled={sending || !email.trim()}
+          className="px-5 py-2.5 rounded-lg border border-primary text-primary font-body text-sm tracking-widest hover:bg-primary hover:text-primary-foreground transition-all duration-300 disabled:opacity-50 whitespace-nowrap"
+        >
+          {sending ? "..." : lang === "lv" ? "Nosūtīt saiti" : "Send link"}
+        </button>
+      </div>
+      {error && <p className="font-body text-xs text-destructive">{error}</p>}
+    </form>
+  );
+};
+
 const Forum = () => {
   const { lang } = useLanguage();
-  const { user, isAdmin, displayName, avatarUrl, signInWithGoogle, loading: authLoading } = useAuth();
+  const { user, isAdmin, displayName, avatarUrl, loading: authLoading } = useAuth();
 
   const [topics, setTopics] = useState<Topic[]>([]);
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [authReady, setAuthReady] = useState(false);
 
   const [newTopicTitle, setNewTopicTitle] = useState("");
   const [newTopicMessage, setNewTopicMessage] = useState("");
@@ -41,41 +114,22 @@ const Forum = () => {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    let mounted = true;
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!mounted) return;
-      console.log("[Forum] Initial session check:", session);
-      setAuthReady(true);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("[Forum] Auth event:", event, session);
-      if (!mounted) return;
-      setAuthReady(true);
-      fetchTopics();
-    });
-
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-    };
+    fetchTopics();
   }, []);
 
   useEffect(() => {
-    fetchTopics();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+      fetchTopics();
+    });
+    return () => subscription.unsubscribe();
   }, []);
 
   async function fetchTopics() {
     setLoading(true);
-    console.log("[Forum] Current user session:", user, "| isAdmin:", isAdmin);
-
     const { data, error } = await supabase
       .from("topics")
       .select("id, title, author_name, author_avatar, user_id, created_at")
       .order("created_at", { ascending: false });
-
-    console.log("[Forum] Topics loaded:", data, "| Error:", error);
 
     if (!error && data) {
       const topicIds = data.map((t) => t.id);
@@ -93,8 +147,6 @@ const Forum = () => {
       }
 
       setTopics(data.map((t) => ({ ...t, comment_count: counts[t.id] || 0 })));
-    } else if (error) {
-      console.error("[Forum] Error fetching topics:", error.message);
     }
     setLoading(false);
   }
@@ -131,7 +183,6 @@ const Forum = () => {
       .single();
 
     if (!error && data) {
-      // Insert the first message as a comment
       await supabase.from("comments").insert([{
         topic_id: data.id,
         message: newTopicMessage.trim(),
@@ -271,11 +322,7 @@ const Forum = () => {
             )}
           </div>
 
-          {authLoading || !authReady ? (
-            <p className="text-center text-muted-foreground font-body text-sm py-3">
-              {lang === "lv" ? "Pārbauda pierakstīšanos..." : "Checking sign-in..."}
-            </p>
-          ) : user ? (
+          {user ? (
             <form onSubmit={handlePostComment} className="flex gap-3">
               <input
                 type="text"
@@ -293,13 +340,7 @@ const Forum = () => {
               </button>
             </form>
           ) : (
-            <button
-              onClick={signInWithGoogle}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-lg border border-border text-muted-foreground font-body text-sm hover:border-primary hover:text-primary transition-all"
-            >
-              <LogIn className="w-4 h-4" />
-              {lang === "lv" ? "Pierakstieties ar Google, lai atbildētu" : "Sign in with Google to reply"}
-            </button>
+            <EmailOtpForm context="reply" />
           )}
         </div>
       </section>
@@ -315,11 +356,7 @@ const Forum = () => {
         </h2>
 
         {/* Create topic */}
-        {authLoading || !authReady ? (
-          <p className="mb-8 text-center text-muted-foreground font-body text-sm">
-            {lang === "lv" ? "Pārbauda pierakstīšanos..." : "Checking sign-in..."}
-          </p>
-        ) : user ? (
+        {user ? (
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-3">
               <AvatarBubble url={avatarUrl} name={displayName || user.email || "User"} />
@@ -373,13 +410,9 @@ const Forum = () => {
             )}
           </div>
         ) : (
-          <button
-            onClick={signInWithGoogle}
-            className="mb-8 w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-border/50 text-muted-foreground font-body text-sm hover:border-primary hover:text-primary transition-all"
-          >
-            <LogIn className="w-4 h-4" />
-            {lang === "lv" ? "Pierakstieties ar Google, lai izveidotu tēmu" : "Sign in with Google to create a topic"}
-          </button>
+          <div className="mb-8">
+            <EmailOtpForm context="topic" />
+          </div>
         )}
 
         {/* Topic list */}

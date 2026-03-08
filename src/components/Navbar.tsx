@@ -8,7 +8,7 @@ import AdminLogin from "@/components/AdminLogin";
 const Navbar = () => {
   const { lang, t, toggleLang } = useLanguage();
   const { isAdmin: isLocalAdmin } = useAdmin();
-  const { user, displayName, avatarUrl, signInWithGoogle, signOut } = useAuth();
+  const { user, displayName, avatarUrl, signOut } = useAuth();
 
   const links = [
     { label: t.nav.listen, href: "#music" },
@@ -37,8 +37,7 @@ const Navbar = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Google user */}
-          {user ? (
+          {user && (
             <div className="flex items-center gap-2">
               {avatarUrl ? (
                 <img src={avatarUrl} alt="" className="w-7 h-7 rounded-full" />
@@ -58,13 +57,6 @@ const Navbar = () => {
                 <LogOut className="w-3.5 h-3.5" />
               </button>
             </div>
-          ) : (
-            <button
-              onClick={signInWithGoogle}
-              className="text-xs font-body tracking-widest border border-border rounded-full px-3 py-1.5 hover:border-primary hover:text-primary transition-all duration-300 text-muted-foreground"
-            >
-              Google
-            </button>
           )}
 
           {isLocalAdmin && (
