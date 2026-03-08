@@ -234,6 +234,16 @@ const AdminPanel = () => {
             >
               <MessageCircle className="w-3.5 h-3.5" /> Comments
             </button>
+            <button
+              onClick={() => setTab("community")}
+              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-body tracking-widest border transition-all ${
+                tab === "community"
+                  ? "border-primary text-primary glow-box"
+                  : "border-border text-muted-foreground hover:border-primary/50"
+              }`}
+            >
+              <Users className="w-3.5 h-3.5" /> Kopiena
+            </button>
           </div>
         </div>
       </header>
