@@ -8,6 +8,7 @@ interface Topic {
   id: string;
   title: string;
   author_name: string;
+  author_avatar: string | null;
   user_id: string;
   created_at: string;
   comment_count: number;
@@ -33,6 +34,7 @@ const Forum = () => {
   const [loading, setLoading] = useState(true);
 
   const [newTopicTitle, setNewTopicTitle] = useState("");
+  const [newTopicMessage, setNewTopicMessage] = useState("");
   const [showNewTopic, setShowNewTopic] = useState(false);
   const [newComment, setNewComment] = useState("");
   const [saving, setSaving] = useState(false);
@@ -43,14 +45,12 @@ const Forum = () => {
 
   const fetchTopics = async () => {
     setLoading(true);
-    // Fetch topics with comment count
     const { data, error } = await supabase
       .from("topics")
-      .select("id, title, author_name, user_id, created_at")
+      .select("id, title, author_name, author_avatar, user_id, created_at")
       .order("created_at", { ascending: false });
 
     if (!error && data) {
-      // Get comment counts
       const topicIds = data.map((t) => t.id);
       const { data: countData } = await supabase
         .from("comments")
@@ -84,7 +84,7 @@ const Forum = () => {
 
   const handleCreateTopic = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !newTopicTitle.trim()) return;
+    if (!user || !newTopicTitle.trim() || !newTopicMessage.trim()) return;
     setSaving(true);
 
     const { data, error } = await supabase
@@ -92,13 +92,24 @@ const Forum = () => {
       .insert([{
         title: newTopicTitle.trim(),
         author_name: displayName || user.email || "User",
+        author_avatar: avatarUrl || null,
         user_id: user.id,
       }])
       .select()
       .single();
 
     if (!error && data) {
+      // Insert the first message as a comment
+      await supabase.from("comments").insert([{
+        topic_id: data.id,
+        message: newTopicMessage.trim(),
+        author_name: displayName || user.email || "User",
+        user_id: user.id,
+        avatar_url: avatarUrl || null,
+      }]);
+
       setNewTopicTitle("");
+      setNewTopicMessage("");
       setShowNewTopic(false);
       fetchTopics();
     }
@@ -130,7 +141,6 @@ const Forum = () => {
   };
 
   const handleDeleteTopic = async (topicId: string) => {
-    // Delete all comments first, then topic
     await supabase.from("comments").delete().eq("topic_id", topicId);
     const { error } = await supabase.from("topics").delete().eq("id", topicId);
     if (!error) {
@@ -157,7 +167,17 @@ const Forum = () => {
     });
   };
 
-  // Thread view
+  const AvatarBubble = ({ url, name }: { url?: string | null; name: string }) => (
+    url ? (
+      <img src={url} alt="" className="w-8 h-8 rounded-full shrink-0" />
+    ) : (
+      <div className="w-8 h-8 rounded-full bg-secondary shrink-0 flex items-center justify-center text-xs font-heading text-primary">
+        {name?.[0]?.toUpperCase() || "?"}
+      </div>
+    )
+  );
+
+  // ── Thread view ──
   if (selectedTopic) {
     return (
       <section id="community" className="relative z-10 py-24 px-4">
@@ -175,6 +195,7 @@ const Forum = () => {
               {selectedTopic.title}
             </h2>
             <div className="flex items-center gap-3 mt-2">
+              <AvatarBubble url={selectedTopic.author_avatar} name={selectedTopic.author_name} />
               <span className="text-xs font-body text-primary tracking-wider">{selectedTopic.author_name}</span>
               <span className="text-xs font-body text-muted-foreground">{formatDate(selectedTopic.created_at)}</span>
             </div>
@@ -189,23 +210,16 @@ const Forum = () => {
             )}
           </div>
 
-          {/* Comments */}
           <div className="space-y-3 mb-8">
             {comments.map((c) => (
               <div key={c.id} className="p-4 rounded-xl border border-border/20 bg-card/10 backdrop-blur-sm flex items-start gap-3">
-                {c.avatar_url ? (
-                  <img src={c.avatar_url} alt="" className="w-8 h-8 rounded-full shrink-0 mt-0.5" />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-secondary shrink-0 mt-0.5 flex items-center justify-center text-xs font-heading text-primary">
-                    {c.author_name?.[0]?.toUpperCase() || "?"}
-                  </div>
-                )}
+                <AvatarBubble url={c.avatar_url} name={c.author_name} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <span className="font-heading text-xs tracking-wider text-primary">{c.author_name}</span>
                     <span className="text-[10px] font-body text-muted-foreground">{formatDate(c.created_at)}</span>
                   </div>
-                  <p className="font-body text-sm text-foreground/70 mt-1">{c.message}</p>
+                  <p className="font-body text-sm text-foreground/70 mt-1 whitespace-pre-wrap">{c.message}</p>
                 </div>
                 {canDelete(c.user_id) && (
                   <button
@@ -225,14 +239,13 @@ const Forum = () => {
             )}
           </div>
 
-          {/* Post comment */}
           {user ? (
             <form onSubmit={handlePostComment} className="flex gap-3">
               <input
                 type="text"
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
-                placeholder={lang === "lv" ? "Raksti komentāru..." : "Write a comment..."}
+                placeholder={lang === "lv" ? "Raksti atbildi..." : "Write a reply..."}
                 className="flex-1 bg-card/40 border border-border rounded-lg px-4 py-2.5 font-body text-foreground text-sm focus:border-primary focus:outline-none transition-colors"
               />
               <button
@@ -240,7 +253,7 @@ const Forum = () => {
                 disabled={saving || !newComment.trim()}
                 className="px-5 py-2.5 rounded-lg border border-primary text-primary font-body text-sm tracking-widest hover:bg-primary hover:text-primary-foreground transition-all duration-300 disabled:opacity-50"
               >
-                {lang === "lv" ? "Sūtīt" : "Send"}
+                {lang === "lv" ? "Atbildēt" : "Reply"}
               </button>
             </form>
           ) : (
@@ -249,7 +262,7 @@ const Forum = () => {
               className="w-full flex items-center justify-center gap-2 py-3 rounded-lg border border-border text-muted-foreground font-body text-sm hover:border-primary hover:text-primary transition-all"
             >
               <LogIn className="w-4 h-4" />
-              {lang === "lv" ? "Pierakstieties ar Google, lai komentētu" : "Sign in with Google to comment"}
+              {lang === "lv" ? "Pierakstieties ar Google, lai atbildētu" : "Sign in with Google to reply"}
             </button>
           )}
         </div>
@@ -257,7 +270,7 @@ const Forum = () => {
     );
   }
 
-  // Topic list view
+  // ── Topic list view ──
   return (
     <section id="community" className="relative z-10 py-24 px-4">
       <div className="container mx-auto max-w-2xl">
@@ -277,17 +290,24 @@ const Forum = () => {
                 autoFocus
                 className="w-full bg-card/40 border border-border rounded-lg px-4 py-2.5 font-body text-foreground text-sm focus:border-primary focus:outline-none transition-colors"
               />
+              <textarea
+                value={newTopicMessage}
+                onChange={(e) => setNewTopicMessage(e.target.value)}
+                placeholder={lang === "lv" ? "Pirmā ziņa..." : "First message..."}
+                rows={3}
+                className="w-full bg-card/40 border border-border rounded-lg px-4 py-2.5 font-body text-foreground text-sm focus:border-primary focus:outline-none transition-colors resize-none"
+              />
               <div className="flex gap-3">
                 <button
                   type="submit"
-                  disabled={saving || !newTopicTitle.trim()}
+                  disabled={saving || !newTopicTitle.trim() || !newTopicMessage.trim()}
                   className="px-5 py-2 rounded-lg bg-primary text-primary-foreground font-body text-sm tracking-widest hover:bg-primary/80 transition-all disabled:opacity-50"
                 >
                   {saving ? "..." : lang === "lv" ? "Izveidot" : "Create"}
                 </button>
                 <button
                   type="button"
-                  onClick={() => { setShowNewTopic(false); setNewTopicTitle(""); }}
+                  onClick={() => { setShowNewTopic(false); setNewTopicTitle(""); setNewTopicMessage(""); }}
                   className="px-5 py-2 rounded-lg border border-border text-muted-foreground font-body text-sm hover:text-foreground transition-colors"
                 >
                   {lang === "lv" ? "Atcelt" : "Cancel"}
@@ -328,7 +348,8 @@ const Forum = () => {
                 onClick={() => openTopic(topic)}
                 className="p-4 rounded-xl border border-border/30 bg-card/20 backdrop-blur-sm cursor-pointer hover:border-primary/30 hover:bg-card/30 transition-all duration-300 group"
               >
-                <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start gap-3">
+                  <AvatarBubble url={topic.author_avatar} name={topic.author_name} />
                   <div className="flex-1 min-w-0">
                     <h3 className="font-heading text-sm tracking-wider text-foreground group-hover:text-primary transition-colors truncate">
                       {topic.title}
