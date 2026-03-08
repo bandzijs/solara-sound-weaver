@@ -222,7 +222,7 @@ const Forum = () => {
       .from("topics")
       .insert([{
         title: newTopicTitle.trim(),
-        author_name: displayName || user.email || "User",
+        author_name: displayName,
         author_avatar: avatarUrl || null,
         user_id: user.id,
       }])
