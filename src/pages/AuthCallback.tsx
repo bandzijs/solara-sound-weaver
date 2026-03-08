@@ -6,10 +6,21 @@ export default function AuthCallback() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
-      console.log('Callback session:', session?.user?.email, error);
+    const handleCallback = async () => {
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get('code');
+
+      if (code) {
+        const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+        console.log('Exchanged code, session:', data?.session?.user?.email, error);
+      } else {
+        console.log('No code in callback URL');
+      }
+
       navigate('/', { replace: true });
-    });
+    };
+
+    handleCallback();
   }, [navigate]);
 
   return (
