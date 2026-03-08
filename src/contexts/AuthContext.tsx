@@ -43,7 +43,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: "https://solaraflames.com/auth/callback",
+        redirectTo: window.location.origin + "/auth/callback",
       },
     });
 
