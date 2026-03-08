@@ -87,6 +87,23 @@ const AdminPanel = () => {
     if (data) setComments(data);
   };
 
+  const handleEditSong = (song: SongRow) => {
+    setForm({
+      title_lv: song.title_lv,
+      title_en: song.title_en,
+      youtube_id: song.youtube_id,
+      style: song.style,
+      badge_lv: song.badge_lv,
+      badge_en: song.badge_en,
+      poem_lv: song.poem_lv,
+      poem_en: song.poem_en,
+      author_note_lv: song.author_note_lv || "",
+      author_note_en: song.author_note_en || "",
+    });
+    setEditingId(song.id);
+    setShowForm(true);
+  };
+
   const handleSaveSong = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -102,15 +119,23 @@ const AdminPanel = () => {
       author_note_lv: form.author_note_lv || null,
       author_note_en: form.author_note_en || null,
     };
-    console.log("[AdminPanel] Saving song:", payload);
-    const { data, error } = await supabase.from("songs").insert([payload]).select();
+
+    let error;
+    if (editingId) {
+      console.log("[AdminPanel] Updating song:", editingId, payload);
+      ({ error } = await supabase.from("songs").update(payload).eq("id", editingId));
+    } else {
+      console.log("[AdminPanel] Saving song:", payload);
+      ({ error } = await supabase.from("songs").insert([payload]));
+    }
+
     if (error) {
       console.error("[AdminPanel] Save error:", error);
       alert(`Error saving song: ${error.message}`);
     } else {
-      console.log("[AdminPanel] Song saved successfully:", data);
       setForm(emptyForm);
       setShowForm(false);
+      setEditingId(null);
       fetchSongs();
     }
     setSaving(false);
