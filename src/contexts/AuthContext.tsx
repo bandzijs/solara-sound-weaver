@@ -10,7 +10,10 @@ interface AuthContextType {
   loading: boolean;
   isAdmin: boolean;
   displayName: string | null;
+  nickname: string | null;
   avatarUrl: string | null;
+  needsNickname: boolean;
+  setNickname: (name: string) => void;
   signInWithOtp: (email: string) => Promise<{ error: Error | null }>;
   verifyOtp: (email: string, token: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
@@ -22,18 +25,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [nickname, setNicknameState] = useState<string | null>(null);
+  const [profileChecked, setProfileChecked] = useState(false);
+
+  const fetchNickname = async (userId: string) => {
+    const { data } = await supabase
+      .from("profiles")
+      .select("nickname")
+      .eq("id", userId)
+      .maybeSingle();
+    setNicknameState(data?.nickname ?? null);
+    setProfileChecked(true);
+  };
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+      if (session?.user) {
+        fetchNickname(session.user.id);
+      } else {
+        setNicknameState(null);
+        setProfileChecked(false);
+      }
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+      if (session?.user) {
+        fetchNickname(session.user.id);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -62,12 +86,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await supabase.auth.signOut();
   };
 
+  const setNickname = (name: string) => {
+    setNicknameState(name);
+  };
+
   const isAdmin = user?.email === ADMIN_EMAIL;
-  const displayName = user?.user_metadata?.full_name ?? user?.user_metadata?.name ?? user?.email ?? null;
+  const displayName = nickname ?? "Anonīms";
   const avatarUrl = user?.user_metadata?.avatar_url ?? null;
+  const needsNickname = !!user && profileChecked && !nickname;
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, isAdmin, displayName, avatarUrl, signInWithOtp, verifyOtp, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, isAdmin, displayName, nickname, avatarUrl, needsNickname, setNickname, signInWithOtp, verifyOtp, signOut }}>
       {children}
     </AuthContext.Provider>
   );

@@ -3,6 +3,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { MessageSquare, Plus, ArrowLeft, Trash2, Mail } from "lucide-react";
+import NicknameModal from "@/components/NicknameModal";
 
 interface Topic {
   id: string;
@@ -146,7 +147,7 @@ const EmailOtpForm = ({ context }: { context: "topic" | "reply" }) => {
 
 const Forum = () => {
   const { lang } = useLanguage();
-  const { user, isAdmin, displayName, avatarUrl, loading: authLoading } = useAuth();
+  const { user, isAdmin, displayName, avatarUrl, needsNickname, setNickname, loading: authLoading } = useAuth();
 
   const [topics, setTopics] = useState<Topic[]>([]);
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
@@ -221,7 +222,7 @@ const Forum = () => {
       .from("topics")
       .insert([{
         title: newTopicTitle.trim(),
-        author_name: displayName || user.email || "User",
+        author_name: displayName,
         author_avatar: avatarUrl || null,
         user_id: user.id,
       }])
@@ -232,7 +233,7 @@ const Forum = () => {
       await supabase.from("comments").insert([{
         topic_id: data.id,
         message: newTopicMessage.trim(),
-        author_name: displayName || user.email || "User",
+        author_name: displayName,
         user_id: user.id,
         avatar_url: avatarUrl || null,
       }]);
@@ -255,7 +256,7 @@ const Forum = () => {
       .insert([{
         topic_id: selectedTopic.id,
         message: newComment.trim(),
-        author_name: displayName || user.email || "User",
+        author_name: displayName,
         user_id: user.id,
         avatar_url: avatarUrl || null,
       }])
@@ -396,6 +397,7 @@ const Forum = () => {
   // ── Topic list view ──
   return (
     <section id="community" className="relative z-10 py-24 px-4">
+      <NicknameModal open={needsNickname} onSaved={setNickname} />
       <div className="container mx-auto max-w-2xl">
         <h2 className="font-heading text-3xl md:text-4xl text-center text-foreground glow-text mb-12 tracking-wider">
           {lang === "lv" ? "Kopiena" : "Community"}
@@ -405,9 +407,9 @@ const Forum = () => {
         {user ? (
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-3">
-              <AvatarBubble url={avatarUrl} name={displayName || user.email || "User"} />
+              <AvatarBubble url={avatarUrl} name={displayName} />
               <span className="text-xs font-body text-muted-foreground tracking-wide truncate">
-                {displayName || user.email}
+                {displayName}
               </span>
             </div>
 
