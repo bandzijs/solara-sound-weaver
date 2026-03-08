@@ -50,7 +50,7 @@ const emptyForm = {
 };
 
 const AdminPanel = () => {
-  const { isAdmin } = useAdmin();
+  const { isAdmin, loginAdmin } = useAdmin();
   const navigate = useNavigate();
   const [tab, setTab] = useState<"songs" | "comments">("songs");
   const [songs, setSongs] = useState<SongRow[]>([]);
