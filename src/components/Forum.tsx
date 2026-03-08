@@ -26,18 +26,41 @@ interface Comment {
 
 const Forum = () => {
   const { lang } = useLanguage();
-  const { user, isAdmin, displayName, avatarUrl, signInWithGoogle } = useAuth();
+  const { user, isAdmin, displayName, avatarUrl, signInWithGoogle, loading: authLoading } = useAuth();
 
   const [topics, setTopics] = useState<Topic[]>([]);
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [authReady, setAuthReady] = useState(false);
 
   const [newTopicTitle, setNewTopicTitle] = useState("");
   const [newTopicMessage, setNewTopicMessage] = useState("");
   const [showNewTopic, setShowNewTopic] = useState(false);
   const [newComment, setNewComment] = useState("");
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
+      console.log("[Forum] Initial session check:", session);
+      setAuthReady(true);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("[Forum] Auth event:", event, session);
+      if (!mounted) return;
+      setAuthReady(true);
+      fetchTopics();
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
 
   useEffect(() => {
     fetchTopics();
