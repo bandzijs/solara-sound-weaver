@@ -8,26 +8,8 @@ const CommunityWall = () => {
   const [name, setName] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
-
   useEffect(() => {
     fetchComments();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        setName(session.user.user_metadata?.full_name || session.user.email || "");
-      }
-    });
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        setName(session.user.user_metadata?.full_name || session.user.email || "");
-      }
-    });
-
-    return () => subscription.unsubscribe();
   }, []);
 
   const fetchComments = async () => {
@@ -41,38 +23,6 @@ const CommunityWall = () => {
       setComments(data);
     }
     setLoading(false);
-  };
-
-  const handleGoogleLogin = async () => {
-    const isCustomDomain =
-      !window.location.hostname.includes("lovable.app") &&
-      !window.location.hostname.includes("lovableproject.com");
-
-    const redirectUrl = window.location.origin;
-
-    if (isCustomDomain) {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: redirectUrl,
-          skipBrowserRedirect: true,
-        },
-      });
-      if (!error && data?.url) {
-        window.location.href = data.url;
-      }
-    } else {
-      await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: { redirectTo: redirectUrl },
-      });
-    }
-  };
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setName("");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -96,31 +46,13 @@ const CommunityWall = () => {
           {t.community.heading}
         </h2>
 
-        <div className="flex justify-end mb-4">
-          {user ? (
-            <button
-              onClick={handleLogout}
-              className="text-xs font-body text-muted-foreground hover:text-foreground transition-colors"
-            >
-              {user.user_metadata?.full_name || user.email} — Log out
-            </button>
-          ) : (
-            <button
-              onClick={handleGoogleLogin}
-              className="px-4 py-2 rounded-lg border border-primary text-primary font-body text-xs tracking-widest hover:bg-primary hover:text-primary-foreground transition-all duration-300"
-            >
-              Sign in with Google
-            </button>
-          )}
-        </div>
-
         <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 mb-12">
           <input
             type="text"
             placeholder={t.community.namePlaceholder}
             value={name}
             onChange={(e) => setName(e.target.value)}
-            readOnly={!!user}
+            
             className="bg-card/40 border border-border rounded-lg px-4 py-2.5 font-body text-foreground text-sm focus:border-primary focus:outline-none transition-colors sm:w-1/4"
           />
           <input
