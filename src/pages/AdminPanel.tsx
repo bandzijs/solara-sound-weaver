@@ -57,6 +57,7 @@ const AdminPanel = () => {
   const [comments, setComments] = useState<CommentRow[]>([]);
   const [form, setForm] = useState(emptyForm);
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   const [password, setPassword] = useState("");
