@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/lib/supabase";
-import { songs as staticSongs, styleKeys, type Song } from "@/data/songs";
+import { styleKeys, type Song } from "@/data/songs";
 import { Search, ChevronLeft, ChevronRight } from "lucide-react";
 
 const SONGS_PER_PAGE = 9;
@@ -20,39 +20,52 @@ interface DbSong {
   author_note_en?: string;
 }
 
+const mapDbSong = (s: DbSong, i: number): Song => ({
+  id: 1000 + i,
+  titleLV: s.title_lv,
+  titleEN: s.title_en,
+  youtubeId: s.youtube_id,
+  style: s.style,
+  badgeLV: s.badge_lv,
+  badgeEN: s.badge_en,
+  poemLV: s.poem_lv,
+  poemEN: s.poem_en,
+  authorNoteLV: s.author_note_lv,
+  authorNoteEN: s.author_note_en,
+});
+
 const MusicGallery = () => {
   const { lang, t } = useLanguage();
   const [filter, setFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const [allSongs, setAllSongs] = useState<Song[]>(staticSongs);
+  const [allSongs, setAllSongs] = useState<Song[]>([]);
   const sectionRef = useRef<HTMLElement>(null);
 
-  useEffect(() => {
-    const fetchDbSongs = async () => {
-      const { data } = await supabase
-        .from("songs")
-        .select("*")
-        .order("created_at", { ascending: false });
+  const fetchSongs = async () => {
+    const { data } = await supabase
+      .from("songs")
+      .select("*")
+      .order("created_at", { ascending: false });
 
-      if (data && data.length > 0) {
-        const dbSongs: Song[] = (data as DbSong[]).map((s, i) => ({
-          id: 1000 + i,
-          titleLV: s.title_lv,
-          titleEN: s.title_en,
-          youtubeId: s.youtube_id,
-          style: s.style,
-          badgeLV: s.badge_lv,
-          badgeEN: s.badge_en,
-          poemLV: s.poem_lv,
-          poemEN: s.poem_en,
-          authorNoteLV: s.author_note_lv,
-          authorNoteEN: s.author_note_en,
-        }));
-        setAllSongs([...dbSongs, ...staticSongs]);
-      }
+    if (data) {
+      setAllSongs((data as DbSong[]).map(mapDbSong));
+    }
+  };
+
+  useEffect(() => {
+    fetchSongs();
+
+    const channel = supabase
+      .channel("public:songs")
+      .on("postgres_changes", { event: "*", schema: "public", table: "songs" }, () => {
+        fetchSongs();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
     };
-    fetchDbSongs();
   }, []);
 
   const filtered = useMemo(() => {
