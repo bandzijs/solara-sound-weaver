@@ -23,6 +23,7 @@ const Index = () => {
         <SubmitForm />
         <Forum />
         <Footer />
+        <CookieConsent />
       </div>
     </LanguageProvider>
   );
