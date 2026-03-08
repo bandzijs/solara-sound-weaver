@@ -51,7 +51,7 @@ const EmailOtpForm = ({ context }: { context: "topic" | "reply" }) => {
 
   const handleVerifyCode = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!otpCode.trim() || otpCode.length !== 6) return;
+    if (!otpCode.trim() || otpCode.length < 6 || otpCode.length > 8) return;
     setSending(true);
     setError("");
 
@@ -82,17 +82,17 @@ const EmailOtpForm = ({ context }: { context: "topic" | "reply" }) => {
             type="text"
             inputMode="numeric"
             pattern="[0-9]*"
-            maxLength={6}
+            maxLength={8}
             required
             value={otpCode}
-            onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-            placeholder={lang === "lv" ? "6-ciparu kods" : "6-digit code"}
+            onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 8))}
+            placeholder={lang === "lv" ? "Kods" : "Code"}
             autoFocus
             className="flex-1 bg-card/40 border border-border rounded-lg px-4 py-2.5 font-body text-foreground text-sm text-center tracking-[0.3em] focus:border-primary focus:outline-none transition-colors"
           />
           <button
             type="submit"
-            disabled={sending || otpCode.length !== 6}
+            disabled={sending || otpCode.length < 6 || otpCode.length > 8}
             className="px-5 py-2.5 rounded-lg border border-primary text-primary font-body text-sm tracking-widest hover:bg-primary hover:text-primary-foreground transition-all duration-300 disabled:opacity-50 whitespace-nowrap"
           >
             {sending ? "..." : lang === "lv" ? "Apstiprināt" : "Verify"}
