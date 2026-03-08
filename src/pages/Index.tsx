@@ -8,6 +8,7 @@ import HowItWorks from "@/components/HowItWorks";
 import SubmitForm from "@/components/SubmitForm";
 import Forum from "@/components/Forum";
 import Footer from "@/components/Footer";
+import CookieConsent from "@/components/CookieConsent";
 
 const Index = () => {
   return (
