@@ -1,5 +1,5 @@
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Instagram, Youtube } from "lucide-react";
+import { Instagram, Youtube, Mail, Phone } from "lucide-react";
 import { useState } from "react";
 import { useAdmin } from "@/contexts/AdminContext";
 
