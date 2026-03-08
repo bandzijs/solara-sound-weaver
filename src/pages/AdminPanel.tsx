@@ -354,28 +354,6 @@ const AdminPanel = () => {
           </div>
         )}
 
-        {tab === "comments" && (
-          <div>
-            <h2 className="font-heading text-xl text-foreground tracking-wider mb-6">Comments ({comments.length})</h2>
-            <div className="space-y-3">
-              {comments.map((c) => (
-                <div key={c.id} className="flex items-start justify-between p-4 rounded-xl border border-border/30 bg-card/20 backdrop-blur-sm gap-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-heading text-xs tracking-wider text-primary">{c.name}</span>
-                      <span className="text-[10px] text-muted-foreground font-body">{new Date(c.created_at).toLocaleDateString()}</span>
-                    </div>
-                    <p className="font-body text-sm text-foreground/70 mt-1">{c.message}</p>
-                  </div>
-                  <button onClick={() => handleDeleteComment(c.id)} className="text-muted-foreground hover:text-destructive transition-colors shrink-0 mt-1">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
-              {comments.length === 0 && <p className="text-center text-muted-foreground font-body text-sm py-8">No comments</p>}
-            </div>
-          </div>
-        )}
         {tab === "community" && <CommunityModeration />}
       </main>
     </div>
