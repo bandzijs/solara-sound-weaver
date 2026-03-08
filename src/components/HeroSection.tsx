@@ -9,7 +9,7 @@ const HeroSection = () => {
       <div className="absolute w-64 h-64 rounded-full bg-primary/10 blur-[100px] animate-pulse-glow" />
 
       <img
-        src="https://i.postimg.cc/x1H7CT5f/Chat-GPT-Image-2025-g-28-okt-11-22-58.png"
+        src="https://i.postimg.cc/TYMZgDs6/Chat-GPT-Image-2025-g-28-okt-11-22-58.png"
         alt="Solara Music Vibes"
         className="w-full max-w-[200px] rounded-full mb-4"
         style={{ filter: "drop-shadow(0 0 25px rgba(77,217,224,0.8))" }}
