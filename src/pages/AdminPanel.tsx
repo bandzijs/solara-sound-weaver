@@ -144,13 +144,6 @@ const AdminPanel = () => {
     }
   };
 
-  const handleDeleteComment = async (id: string) => {
-    const { error } = await supabase
-      .from("comments")
-      .update({ is_deleted: true, deleted_at: new Date().toISOString() })
-      .eq("id", id);
-    if (!error) setComments((prev) => prev.filter((c) => c.id !== id));
-  };
 
   const handleAdminLogin = (e: React.FormEvent) => {
     e.preventDefault();
