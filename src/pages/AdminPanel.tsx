@@ -19,12 +19,6 @@ interface SongRow {
   author_note_en?: string;
 }
 
-interface CommentRow {
-  id: string;
-  name: string;
-  message: string;
-  created_at: string;
-}
 
 const STYLE_OPTIONS = [
   { value: "dance", label: "Deju mūzika" },
