@@ -46,7 +46,7 @@ const Footer = () => {
         </div>
 
         <p className="font-body text-sm text-foreground/40 italic mb-2">{t.footer.poetic}</p>
-        <p className="font-body text-xs text-muted-foreground mb-4">© Solara Music Vibes 2025</p>
+        <p className="font-body text-xs text-muted-foreground mb-4">{t.footer.copyright}</p>
 
         {!isAdmin && (
           <>

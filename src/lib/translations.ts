@@ -104,6 +104,7 @@ export const translations = {
     },
     footer: {
       poetic: "Where stars meet words.",
+      copyright: "© 2026 Solara Music Vibes. All rights reserved.",
     },
     moods: {
       melancholic: "Melancholic",
