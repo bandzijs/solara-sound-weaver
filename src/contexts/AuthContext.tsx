@@ -40,10 +40,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const signInWithGoogle = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
+    const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
         redirectTo: window.location.origin,
+        skipBrowserRedirect: true,
         queryParams: {
           access_type: "offline",
           prompt: "consent",
@@ -51,7 +52,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       },
     });
 
-    if (error) console.error("OAuth error:", error);
+    if (error) {
+      console.error("OAuth error:", error);
+      return;
+    }
+
+    if (data?.url) {
+      console.log("OAuth redirect URL:", data.url);
+      window.location.href = data.url;
+    }
   };
 
   const signOut = async () => {
