@@ -51,6 +51,13 @@ export const translations = {
       cosmic: "Kosmoss",
       other: "Cits",
     },
+    styles: {
+      "dance": "Deju mūzika",
+      "rock-ballad": "Rock balāde",
+      "love-ballad": "Mīlestības balāde",
+      "club-remix": "Club Remix",
+      "folk-rock": "Folk Rock",
+    },
   },
   en: {
     nav: {
