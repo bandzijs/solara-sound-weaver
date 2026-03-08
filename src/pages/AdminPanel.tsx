@@ -66,7 +66,6 @@ const AdminPanel = () => {
   useEffect(() => {
     if (isAdmin) {
       fetchSongs();
-      fetchComments();
     }
   }, [isAdmin]);
 
