@@ -51,7 +51,7 @@ const EmailOtpForm = ({ context }: { context: "topic" | "reply" }) => {
 
   const handleVerifyCode = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!otpCode.trim() || otpCode.length !== 6) return;
+    if (!otpCode.trim() || otpCode.length < 6 || otpCode.length > 8) return;
     setSending(true);
     setError("");
 
