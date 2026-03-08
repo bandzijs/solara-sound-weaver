@@ -1,3 +1,4 @@
+// Auth context – Google OAuth with dynamic redirectTo (2026-03-08)
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import type { User, Session } from "@supabase/supabase-js";
