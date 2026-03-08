@@ -146,7 +146,7 @@ const EmailOtpForm = ({ context }: { context: "topic" | "reply" }) => {
 
 const Forum = () => {
   const { lang } = useLanguage();
-  const { user, isAdmin, displayName, avatarUrl, loading: authLoading } = useAuth();
+  const { user, isAdmin, displayName, avatarUrl, needsNickname, setNickname, loading: authLoading } = useAuth();
 
   const [topics, setTopics] = useState<Topic[]>([]);
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
