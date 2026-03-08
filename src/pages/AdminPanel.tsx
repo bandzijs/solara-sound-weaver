@@ -59,11 +59,8 @@ const AdminPanel = () => {
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    if (!isAdmin) {
-      navigate("/");
-    }
-  }, [isAdmin, navigate]);
+  const [password, setPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
 
   useEffect(() => {
     if (isAdmin) {
