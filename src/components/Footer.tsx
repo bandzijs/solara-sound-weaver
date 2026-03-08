@@ -45,6 +45,23 @@ const Footer = () => {
           </a>
         </div>
 
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6 text-sm font-body">
+          <a
+            href="mailto:info@solaraflames.com"
+            className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300"
+          >
+            <Mail className="w-4 h-4 text-primary/70" />
+            info@solaraflames.com
+          </a>
+          <a
+            href="tel:+37126769475"
+            className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300"
+          >
+            <Phone className="w-4 h-4 text-primary/70" />
+            +371 26769475
+          </a>
+        </div>
+
         <p className="font-body text-sm text-foreground/40 italic mb-2">{t.footer.poetic}</p>
         <p className="font-body text-xs text-muted-foreground mb-4">{t.footer.copyright}</p>
 
