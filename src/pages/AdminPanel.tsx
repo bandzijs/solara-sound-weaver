@@ -116,8 +116,15 @@ const AdminPanel = () => {
   };
 
   const handleDeleteSong = async (id: string) => {
-    const { error } = await supabase.from("songs").delete().eq("id", id);
-    if (!error) setSongs((prev) => prev.filter((s) => s.id !== id));
+    console.log("[AdminPanel] Deleting song:", id);
+    const { error, count } = await supabase.from("songs").delete().eq("id", id);
+    if (error) {
+      console.error("[AdminPanel] Delete error:", error);
+      alert(`Error deleting song: ${error.message}\n\nThis is likely an RLS policy issue. Add this policy in Supabase SQL Editor:\n\nCREATE POLICY "Anyone can delete songs" ON public.songs FOR DELETE USING (true);`);
+    } else {
+      console.log("[AdminPanel] Song deleted successfully, count:", count);
+      setSongs((prev) => prev.filter((s) => s.id !== id));
+    }
   };
 
   const handleDeleteComment = async (id: string) => {
