@@ -1,16 +1,58 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { MessageCircle } from "lucide-react";
-import { songs, styleKeys } from "@/data/songs";
+import { supabase } from "@/lib/supabase";
+import { songs as staticSongs, styleKeys, type Song } from "@/data/songs";
 
 const SONGS_PER_PAGE = 6;
+
+interface DbSong {
+  id: string;
+  title_lv: string;
+  title_en: string;
+  youtube_id: string;
+  style: string;
+  badge_lv: string;
+  badge_en: string;
+  poem_lv: string;
+  poem_en: string;
+  author_note_lv?: string;
+  author_note_en?: string;
+}
 
 const MusicGallery = () => {
   const { lang, t } = useLanguage();
   const [filter, setFilter] = useState<string>("all");
   const [visibleCount, setVisibleCount] = useState(SONGS_PER_PAGE);
+  const [allSongs, setAllSongs] = useState<Song[]>(staticSongs);
 
-  const filtered = filter === "all" ? songs : songs.filter((s) => s.style === filter);
+  useEffect(() => {
+    const fetchDbSongs = async () => {
+      const { data } = await supabase
+        .from("songs")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (data && data.length > 0) {
+        const dbSongs: Song[] = (data as DbSong[]).map((s, i) => ({
+          id: 1000 + i,
+          titleLV: s.title_lv,
+          titleEN: s.title_en,
+          youtubeId: s.youtube_id,
+          style: s.style,
+          badgeLV: s.badge_lv,
+          badgeEN: s.badge_en,
+          poemLV: s.poem_lv,
+          poemEN: s.poem_en,
+          authorNoteLV: s.author_note_lv,
+          authorNoteEN: s.author_note_en,
+        }));
+        setAllSongs([...dbSongs, ...staticSongs]);
+      }
+    };
+    fetchDbSongs();
+  }, []);
+
+  const filtered = filter === "all" ? allSongs : allSongs.filter((s) => s.style === filter);
   const visible = filtered.slice(0, visibleCount);
   const hasMore = visibleCount < filtered.length;
 
