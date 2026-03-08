@@ -1,10 +1,22 @@
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/lib/supabase";
 import { styleKeys, type Song } from "@/data/songs";
 import { Search, ChevronLeft, ChevronRight } from "lucide-react";
+import StarRating from "@/components/StarRating";
 
 const SONGS_PER_PAGE = 9;
+
+// Get or create a persistent visitor ID
+function getVisitorId(): string {
+  const key = "solara_visitor_id";
+  let id = localStorage.getItem(key);
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem(key, id);
+  }
+  return id;
+}
 
 interface DbSong {
   id: string;
@@ -20,8 +32,13 @@ interface DbSong {
   author_note_en?: string;
 }
 
-const mapDbSong = (s: DbSong, i: number): Song => ({
+interface SongWithDb extends Song {
+  dbId: string; // actual UUID from songs table
+}
+
+const mapDbSong = (s: DbSong, i: number): SongWithDb => ({
   id: 1000 + i,
+  dbId: s.id,
   titleLV: s.title_lv,
   titleEN: s.title_en,
   youtubeId: s.youtube_id,
@@ -34,13 +51,21 @@ const mapDbSong = (s: DbSong, i: number): Song => ({
   authorNoteEN: s.author_note_en,
 });
 
+interface RatingData {
+  average: number;
+  count: number;
+  userRating: number | null;
+}
+
 const MusicGallery = () => {
   const { lang, t } = useLanguage();
   const [filter, setFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const [allSongs, setAllSongs] = useState<Song[]>([]);
+  const [allSongs, setAllSongs] = useState<SongWithDb[]>([]);
+  const [ratings, setRatings] = useState<Record<string, RatingData>>({});
   const sectionRef = useRef<HTMLElement>(null);
+  const visitorId = useRef(getVisitorId());
 
   const fetchSongs = async () => {
     const { data } = await supabase
@@ -52,6 +77,44 @@ const MusicGallery = () => {
       setAllSongs((data as DbSong[]).map(mapDbSong));
     }
   };
+
+  const fetchRatings = useCallback(async (songIds: string[]) => {
+    if (songIds.length === 0) return;
+
+    // Fetch all ratings for these songs
+    const { data } = await supabase
+      .from("song_ratings")
+      .select("song_id, rating, visitor_id")
+      .in("song_id", songIds);
+
+    if (data) {
+      const map: Record<string, RatingData> = {};
+      // Initialize all songs
+      songIds.forEach((id) => {
+        map[id] = { average: 0, count: 0, userRating: null };
+      });
+
+      // Aggregate
+      const totals: Record<string, { sum: number; count: number }> = {};
+      data.forEach((r) => {
+        if (!totals[r.song_id]) totals[r.song_id] = { sum: 0, count: 0 };
+        totals[r.song_id].sum += r.rating;
+        totals[r.song_id].count += 1;
+        if (r.visitor_id === visitorId.current) {
+          if (map[r.song_id]) map[r.song_id].userRating = r.rating;
+        }
+      });
+
+      Object.entries(totals).forEach(([songId, { sum, count }]) => {
+        if (map[songId]) {
+          map[songId].average = sum / count;
+          map[songId].count = count;
+        }
+      });
+
+      setRatings(map);
+    }
+  }, []);
 
   useEffect(() => {
     fetchSongs();
@@ -67,6 +130,41 @@ const MusicGallery = () => {
       supabase.removeChannel(channel);
     };
   }, []);
+
+  // Fetch ratings when songs load
+  useEffect(() => {
+    if (allSongs.length > 0) {
+      fetchRatings(allSongs.map((s) => s.dbId));
+    }
+  }, [allSongs, fetchRatings]);
+
+  const handleRate = async (songDbId: string, rating: number) => {
+    const vid = visitorId.current;
+
+    // Optimistic update
+    setRatings((prev) => {
+      const old = prev[songDbId] || { average: 0, count: 0, userRating: null };
+      const hadVote = old.userRating !== null;
+      const newCount = hadVote ? old.count : old.count + 1;
+      const newSum = hadVote
+        ? old.average * old.count - (old.userRating ?? 0) + rating
+        : old.average * old.count + rating;
+      return {
+        ...prev,
+        [songDbId]: {
+          average: newCount > 0 ? newSum / newCount : 0,
+          count: newCount,
+          userRating: rating,
+        },
+      };
+    });
+
+    // Upsert to Supabase
+    await supabase.from("song_ratings").upsert(
+      { song_id: songDbId, visitor_id: vid, rating },
+      { onConflict: "song_id,visitor_id" }
+    );
+  };
 
   const filtered = useMemo(() => {
     let result = filter === "all" ? allSongs : allSongs.filter((s) => s.style === filter);
@@ -151,46 +249,61 @@ const MusicGallery = () => {
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {visible.map((song) => (
-            <div
-              key={song.id}
-              className="rounded-2xl border border-border/50 bg-card/40 backdrop-blur-sm overflow-hidden glow-box-hover"
-            >
-              <div className="aspect-video bg-secondary/30">
-                <iframe
-                  src={`https://www.youtube.com/embed/${song.youtubeId}`}
-                  className="w-full h-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  title={lang === "lv" ? song.titleLV : song.titleEN}
-                  loading="lazy"
-                />
-              </div>
-              <div className="p-5">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-heading text-sm tracking-wider text-foreground">
-                    {lang === "lv" ? song.titleLV : song.titleEN}
-                  </h3>
+          {visible.map((song) => {
+            const r = ratings[song.dbId] || { average: 0, count: 0, userRating: null };
+            return (
+              <div
+                key={song.dbId}
+                className="rounded-2xl border border-border/50 bg-card/40 backdrop-blur-sm overflow-hidden glow-box-hover"
+              >
+                <div className="aspect-video bg-secondary/30">
+                  <iframe
+                    src={`https://www.youtube.com/embed/${song.youtubeId}`}
+                    className="w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    title={lang === "lv" ? song.titleLV : song.titleEN}
+                    loading="lazy"
+                  />
                 </div>
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-[10px] font-body tracking-widest text-primary/60 border border-primary/20 rounded-full px-2 py-0.5">
-                    {t.styles[song.style as keyof typeof t.styles]}
-                  </span>
-                  <span className="text-[10px] font-body tracking-widest text-accent-foreground bg-accent/20 border border-accent/30 rounded-full px-2 py-0.5">
-                    {lang === "lv" ? song.badgeLV : song.badgeEN}
-                  </span>
-                </div>
-                <p className="font-body text-sm text-foreground/50 italic mb-3 whitespace-pre-line line-clamp-4">
-                  {lang === "lv" ? song.poemLV : song.poemEN}
-                </p>
-                {song.authorNoteLV && (
-                  <p className="font-body text-[11px] text-primary/50 mb-2">
-                    {lang === "lv" ? song.authorNoteLV : song.authorNoteEN}
+                <div className="p-5">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-heading text-sm tracking-wider text-foreground">
+                      {lang === "lv" ? song.titleLV : song.titleEN}
+                    </h3>
+                  </div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-[10px] font-body tracking-widest text-primary/60 border border-primary/20 rounded-full px-2 py-0.5">
+                      {t.styles[song.style as keyof typeof t.styles]}
+                    </span>
+                    <span className="text-[10px] font-body tracking-widest text-accent-foreground bg-accent/20 border border-accent/30 rounded-full px-2 py-0.5">
+                      {lang === "lv" ? song.badgeLV : song.badgeEN}
+                    </span>
+                  </div>
+
+                  {/* Star Rating */}
+                  <div className="mb-3">
+                    <StarRating
+                      songId={song.dbId}
+                      averageRating={r.average}
+                      totalVotes={r.count}
+                      userRating={r.userRating}
+                      onRate={(rating) => handleRate(song.dbId, rating)}
+                    />
+                  </div>
+
+                  <p className="font-body text-sm text-foreground/50 italic mb-3 whitespace-pre-line line-clamp-4">
+                    {lang === "lv" ? song.poemLV : song.poemEN}
                   </p>
-                )}
+                  {song.authorNoteLV && (
+                    <p className="font-body text-[11px] text-primary/50 mb-2">
+                      {lang === "lv" ? song.authorNoteLV : song.authorNoteEN}
+                    </p>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {filtered.length === 0 && (
