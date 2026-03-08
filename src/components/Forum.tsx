@@ -45,10 +45,14 @@ const Forum = () => {
 
   const fetchTopics = async () => {
     setLoading(true);
+    console.log("[Forum] Current user session:", user, "| isAdmin:", isAdmin);
+
     const { data, error } = await supabase
       .from("topics")
       .select("id, title, author_name, author_avatar, user_id, created_at")
       .order("created_at", { ascending: false });
+
+    console.log("[Forum] Topics loaded:", data, "| Error:", error);
 
     if (!error && data) {
       const topicIds = data.map((t) => t.id);
@@ -63,6 +67,8 @@ const Forum = () => {
       });
 
       setTopics(data.map((t) => ({ ...t, comment_count: counts[t.id] || 0 })));
+    } else if (error) {
+      console.error("[Forum] Error fetching topics:", error.message);
     }
     setLoading(false);
   };
