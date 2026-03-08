@@ -256,7 +256,7 @@ const Forum = () => {
       .insert([{
         topic_id: selectedTopic.id,
         message: newComment.trim(),
-        author_name: displayName || user.email || "User",
+        author_name: displayName,
         user_id: user.id,
         avatar_url: avatarUrl || null,
       }])
