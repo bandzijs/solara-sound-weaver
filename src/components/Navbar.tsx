@@ -1,7 +1,8 @@
+import { useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAdmin } from "@/contexts/AdminContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { Shield, LogOut } from "lucide-react";
+import { Shield, LogOut, Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import AdminLogin from "@/components/AdminLogin";
 
@@ -9,6 +10,7 @@ const Navbar = () => {
   const { lang, t, toggleLang } = useLanguage();
   const { isAdmin: isLocalAdmin } = useAdmin();
   const { user, displayName, avatarUrl, signOut } = useAuth();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const links = [
     { label: t.nav.listen, href: "#music" },
@@ -24,6 +26,7 @@ const Navbar = () => {
           Solara
         </a>
 
+        {/* Desktop links */}
         <div className="hidden md:flex items-center gap-8">
           {links.map((link) => (
             <a
@@ -77,8 +80,35 @@ const Navbar = () => {
             <span className="text-muted-foreground mx-1">|</span>
             <span className={lang === "en" ? "text-primary" : "text-muted-foreground"}>EN</span>
           </button>
+
+          {/* Mobile hamburger */}
+          <button
+            onClick={() => setMobileOpen(!mobileOpen)}
+            className="md:hidden text-foreground/70 hover:text-primary transition-colors"
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
+          >
+            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
         </div>
       </div>
+
+      {/* Mobile menu */}
+      {mobileOpen && (
+        <div className="md:hidden border-t border-border/30 bg-background/95 backdrop-blur-md">
+          <div className="container mx-auto px-4 py-4 flex flex-col gap-3">
+            {links.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                onClick={() => setMobileOpen(false)}
+                className="text-sm font-body text-foreground/70 hover:text-primary transition-colors duration-300 tracking-wide py-2 border-b border-border/20"
+              >
+                {link.label}
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
     </nav>
   );
 };
