@@ -66,7 +66,7 @@ const Forum = () => {
     fetchTopics();
   }, []);
 
-  const fetchTopics = async () => {
+  async function fetchTopics() {
     setLoading(true);
     console.log("[Forum] Current user session:", user, "| isAdmin:", isAdmin);
 
@@ -94,7 +94,7 @@ const Forum = () => {
       console.error("[Forum] Error fetching topics:", error.message);
     }
     setLoading(false);
-  };
+  }
 
   const fetchComments = async (topicId: string) => {
     const { data } = await supabase
