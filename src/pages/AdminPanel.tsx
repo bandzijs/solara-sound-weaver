@@ -212,6 +212,16 @@ const AdminPanel = () => {
             >
               <Users className="w-3.5 h-3.5" /> Kopiena
             </button>
+            <button
+              onClick={() => setTab("links")}
+              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-body tracking-widest border transition-all ${
+                tab === "links"
+                  ? "border-primary text-primary glow-box"
+                  : "border-border text-muted-foreground hover:border-primary/50"
+              }`}
+            >
+              <Link2 className="w-3.5 h-3.5" /> Saites
+            </button>
           </div>
         </div>
       </header>
