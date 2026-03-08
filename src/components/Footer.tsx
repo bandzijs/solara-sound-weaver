@@ -1,5 +1,5 @@
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Instagram, Youtube } from "lucide-react";
+import { Instagram, Youtube, Mail, Phone } from "lucide-react";
 import { useState } from "react";
 import { useAdmin } from "@/contexts/AdminContext";
 
@@ -42,6 +42,23 @@ const Footer = () => {
             aria-label="YouTube"
           >
             <Youtube className="w-5 h-5" />
+          </a>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6 text-sm font-body">
+          <a
+            href="mailto:info@solaraflames.com"
+            className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300"
+          >
+            <Mail className="w-4 h-4 text-primary/70" />
+            info@solaraflames.com
+          </a>
+          <a
+            href="tel:+37126769475"
+            className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300"
+          >
+            <Phone className="w-4 h-4 text-primary/70" />
+            +371 26769475
           </a>
         </div>
 
