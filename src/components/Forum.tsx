@@ -233,7 +233,7 @@ const Forum = () => {
       await supabase.from("comments").insert([{
         topic_id: data.id,
         message: newTopicMessage.trim(),
-        author_name: displayName || user.email || "User",
+        author_name: displayName,
         user_id: user.id,
         avatar_url: avatarUrl || null,
       }]);
