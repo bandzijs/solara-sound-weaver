@@ -2,9 +2,10 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAdmin } from "@/contexts/AdminContext";
 import { supabase } from "@/lib/supabase";
-import { Trash2, Plus, ArrowLeft, Music, Pencil, Users, Link2 } from "lucide-react";
+import { Trash2, Plus, ArrowLeft, Music, Pencil, Users, Link2, Image as ImageIcon } from "lucide-react";
 import CommunityModeration from "@/components/admin/CommunityModeration";
 import SocialLinksAdmin from "@/components/admin/SocialLinksAdmin";
+import BannersAdmin from "@/components/admin/BannersAdmin";
 
 interface SongRow {
   id: string;
