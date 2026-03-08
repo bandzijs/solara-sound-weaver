@@ -1,12 +1,14 @@
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAdmin } from "@/contexts/AdminContext";
-import { Shield } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { Shield, LogOut } from "lucide-react";
 import { Link } from "react-router-dom";
 import AdminLogin from "@/components/AdminLogin";
 
 const Navbar = () => {
   const { lang, t, toggleLang } = useLanguage();
-  const { isAdmin } = useAdmin();
+  const { isAdmin: isLocalAdmin } = useAdmin();
+  const { user, displayName, avatarUrl, signInWithGoogle, signOut } = useAuth();
 
   const links = [
     { label: t.nav.listen, href: "#music" },
@@ -35,16 +37,44 @@ const Navbar = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          {isAdmin && (
-            <>
-              <Link
-                to="/admin"
-                className="flex items-center gap-1 text-xs font-body text-primary border border-primary/30 rounded-full px-2.5 py-1 hover:bg-primary/10 transition-colors"
+          {/* Google user */}
+          {user ? (
+            <div className="flex items-center gap-2">
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="" className="w-7 h-7 rounded-full" />
+              ) : (
+                <div className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center text-xs font-heading text-primary">
+                  {displayName?.[0]?.toUpperCase() || "?"}
+                </div>
+              )}
+              <span className="hidden sm:block text-xs font-body text-foreground/70 max-w-[100px] truncate">
+                {displayName}
+              </span>
+              <button
+                onClick={signOut}
+                className="text-muted-foreground hover:text-primary transition-colors"
+                title={lang === "lv" ? "Iziet" : "Sign out"}
               >
-                <Shield className="w-3 h-3" />
-                Admin
-              </Link>
-            </>
+                <LogOut className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={signInWithGoogle}
+              className="text-xs font-body tracking-widest border border-border rounded-full px-3 py-1.5 hover:border-primary hover:text-primary transition-all duration-300 text-muted-foreground"
+            >
+              Google
+            </button>
+          )}
+
+          {isLocalAdmin && (
+            <Link
+              to="/admin"
+              className="flex items-center gap-1 text-xs font-body text-primary border border-primary/30 rounded-full px-2.5 py-1 hover:bg-primary/10 transition-colors"
+            >
+              <Shield className="w-3 h-3" />
+              Admin
+            </Link>
           )}
           <AdminLogin />
           <button

@@ -6,7 +6,7 @@ import AboutSection from "@/components/AboutSection";
 import MusicGallery from "@/components/MusicGallery";
 import HowItWorks from "@/components/HowItWorks";
 import SubmitForm from "@/components/SubmitForm";
-import CommunityWall from "@/components/CommunityWall";
+import Forum from "@/components/Forum";
 import Footer from "@/components/Footer";
 
 const Index = () => {
@@ -20,7 +20,7 @@ const Index = () => {
         <MusicGallery />
         <HowItWorks />
         <SubmitForm />
-        <CommunityWall />
+        <Forum />
         <Footer />
       </div>
     </LanguageProvider>
