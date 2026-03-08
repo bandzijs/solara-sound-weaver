@@ -1,7 +1,11 @@
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAdmin } from "@/contexts/AdminContext";
+import AdminLogin from "@/components/AdminLogin";
+import { Shield } from "lucide-react";
 
 const Navbar = () => {
   const { lang, t, toggleLang } = useLanguage();
+  const { isAdmin } = useAdmin();
 
   const links = [
     { label: t.nav.listen, href: "#music" },
@@ -29,14 +33,23 @@ const Navbar = () => {
           ))}
         </div>
 
-        <button
-          onClick={toggleLang}
-          className="text-sm font-body tracking-widest border border-border rounded-full px-4 py-1.5 hover:border-primary hover:text-primary transition-all duration-300"
-        >
-          <span className={lang === "lv" ? "text-primary" : "text-muted-foreground"}>LV</span>
-          <span className="text-muted-foreground mx-1">|</span>
-          <span className={lang === "en" ? "text-primary" : "text-muted-foreground"}>EN</span>
-        </button>
+        <div className="flex items-center gap-3">
+          {isAdmin && (
+            <span className="flex items-center gap-1 text-xs font-body text-primary border border-primary/30 rounded-full px-2.5 py-1">
+              <Shield className="w-3 h-3" />
+              Admin
+            </span>
+          )}
+          <AdminLogin />
+          <button
+            onClick={toggleLang}
+            className="text-sm font-body tracking-widest border border-border rounded-full px-4 py-1.5 hover:border-primary hover:text-primary transition-all duration-300"
+          >
+            <span className={lang === "lv" ? "text-primary" : "text-muted-foreground"}>LV</span>
+            <span className="text-muted-foreground mx-1">|</span>
+            <span className={lang === "en" ? "text-primary" : "text-muted-foreground"}>EN</span>
+          </button>
+        </div>
       </div>
     </nav>
   );
