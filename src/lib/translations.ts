@@ -111,6 +111,13 @@ export const translations = {
       cosmic: "Cosmic",
       other: "Other",
     },
+    styles: {
+      "dance": "Dance",
+      "rock-ballad": "Rock Ballad",
+      "love-ballad": "Love Ballad",
+      "club-remix": "Club Remix",
+      "folk-rock": "Folk Rock",
+    },
   },
 } as const;
 
