@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAdmin } from "@/contexts/AdminContext";
 import { supabase } from "@/lib/supabase";
-import { Trash2, Plus, ArrowLeft, Music, MessageCircle, Pencil, Users } from "lucide-react";
+import { Trash2, Plus, ArrowLeft, Music, Pencil, Users } from "lucide-react";
 import CommunityModeration from "@/components/admin/CommunityModeration";
 
 interface SongRow {
@@ -19,12 +19,6 @@ interface SongRow {
   author_note_en?: string;
 }
 
-interface CommentRow {
-  id: string;
-  name: string;
-  message: string;
-  created_at: string;
-}
 
 const STYLE_OPTIONS = [
   { value: "dance", label: "Deju mūzika" },
@@ -53,9 +47,8 @@ const emptyForm = {
 const AdminPanel = () => {
   const { isAdmin, loginAdmin } = useAdmin();
   const navigate = useNavigate();
-  const [tab, setTab] = useState<"songs" | "comments" | "community">("songs");
+  const [tab, setTab] = useState<"songs" | "community">("songs");
   const [songs, setSongs] = useState<SongRow[]>([]);
-  const [comments, setComments] = useState<CommentRow[]>([]);
   const [form, setForm] = useState(emptyForm);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -67,7 +60,6 @@ const AdminPanel = () => {
   useEffect(() => {
     if (isAdmin) {
       fetchSongs();
-      fetchComments();
     }
   }, [isAdmin]);
 
@@ -79,14 +71,6 @@ const AdminPanel = () => {
     if (data) setSongs(data);
   };
 
-  const fetchComments = async () => {
-    const { data } = await supabase
-      .from("comments")
-      .select("id, name, message, created_at")
-      .eq("is_deleted", false)
-      .order("created_at", { ascending: false });
-    if (data) setComments(data);
-  };
 
   const handleEditSong = (song: SongRow) => {
     setForm({
@@ -154,13 +138,6 @@ const AdminPanel = () => {
     }
   };
 
-  const handleDeleteComment = async (id: string) => {
-    const { error } = await supabase
-      .from("comments")
-      .update({ is_deleted: true, deleted_at: new Date().toISOString() })
-      .eq("id", id);
-    if (!error) setComments((prev) => prev.filter((c) => c.id !== id));
-  };
 
   const handleAdminLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -223,16 +200,6 @@ const AdminPanel = () => {
               }`}
             >
               <Music className="w-3.5 h-3.5" /> Songs
-            </button>
-            <button
-              onClick={() => setTab("comments")}
-              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-body tracking-widest border transition-all ${
-                tab === "comments"
-                  ? "border-primary text-primary glow-box"
-                  : "border-border text-muted-foreground hover:border-primary/50"
-              }`}
-            >
-              <MessageCircle className="w-3.5 h-3.5" /> Comments
             </button>
             <button
               onClick={() => setTab("community")}
@@ -366,28 +333,6 @@ const AdminPanel = () => {
           </div>
         )}
 
-        {tab === "comments" && (
-          <div>
-            <h2 className="font-heading text-xl text-foreground tracking-wider mb-6">Comments ({comments.length})</h2>
-            <div className="space-y-3">
-              {comments.map((c) => (
-                <div key={c.id} className="flex items-start justify-between p-4 rounded-xl border border-border/30 bg-card/20 backdrop-blur-sm gap-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-heading text-xs tracking-wider text-primary">{c.name}</span>
-                      <span className="text-[10px] text-muted-foreground font-body">{new Date(c.created_at).toLocaleDateString()}</span>
-                    </div>
-                    <p className="font-body text-sm text-foreground/70 mt-1">{c.message}</p>
-                  </div>
-                  <button onClick={() => handleDeleteComment(c.id)} className="text-muted-foreground hover:text-destructive transition-colors shrink-0 mt-1">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
-              {comments.length === 0 && <p className="text-center text-muted-foreground font-body text-sm py-8">No comments</p>}
-            </div>
-          </div>
-        )}
         {tab === "community" && <CommunityModeration />}
       </main>
     </div>
