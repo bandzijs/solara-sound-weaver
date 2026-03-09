@@ -668,13 +668,19 @@ const Forum = () => {
                   autoFocus
                   className="w-full bg-card/40 border border-border rounded-lg px-4 py-2.5 font-body text-foreground text-sm focus:border-primary focus:outline-none transition-colors"
                 />
-                <textarea
-                  value={newTopicMessage}
-                  onChange={(e) => setNewTopicMessage(e.target.value)}
-                  placeholder={lang === "lv" ? "Pirmā ziņa..." : "First message..."}
-                  rows={3}
-                  className="w-full bg-card/40 border border-border rounded-lg px-4 py-2.5 font-body text-foreground text-sm focus:border-primary focus:outline-none transition-colors resize-none"
-                />
+                <div className="space-y-1">
+                  <textarea
+                    value={newTopicMessage}
+                    onChange={(e) => setNewTopicMessage(e.target.value.slice(0, 50))}
+                    placeholder={lang === "lv" ? "Pirmā ziņa..." : "First message..."}
+                    rows={3}
+                    maxLength={50}
+                    className="w-full bg-card/40 border border-border rounded-lg px-4 py-2.5 font-body text-foreground text-sm focus:border-primary focus:outline-none transition-colors resize-none"
+                  />
+                  <div className="text-right text-xs text-muted-foreground">
+                    {newTopicMessage.length}/50
+                  </div>
+                </div>
                 <div className="flex gap-3">
                   <button
                     type="submit"
