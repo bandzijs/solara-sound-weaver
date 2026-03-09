@@ -427,6 +427,45 @@ const Forum = () => {
     )
   );
 
+  // ── Auth Gate: Show login form if not authenticated ──
+  if (authLoading) {
+    return (
+      <section id="community" className="relative z-10 py-24 px-4">
+        <div className="container mx-auto max-w-2xl text-center">
+          <p className="font-body text-sm text-muted-foreground">
+            {lang === "lv" ? "Ielādē..." : "Loading..."}
+          </p>
+        </div>
+      </section>
+    );
+  }
+
+  if (!user) {
+    return (
+      <section id="community" className="relative z-10 py-24 px-4">
+        <div className="container mx-auto max-w-2xl">
+          <h2 className="font-heading text-3xl md:text-4xl text-center text-foreground glow-text mb-8 tracking-wider">
+            {lang === "lv" ? "Kopiena" : "Community"}
+          </h2>
+          <div className="p-8 rounded-2xl border border-border/30 bg-card/20 backdrop-blur-sm text-center space-y-6">
+            <Mail className="w-12 h-12 text-primary mx-auto" />
+            <div>
+              <h3 className="font-heading text-xl text-foreground mb-2 tracking-wider">
+                {lang === "lv" ? "Privāta kopiena" : "Private Community"}
+              </h3>
+              <p className="font-body text-sm text-muted-foreground">
+                {lang === "lv" 
+                  ? "Lai piekļūtu kopienai, lūdzu, reģistrējies vai piesakies ar e-pastu." 
+                  : "To access the community, please register or sign in with email."}
+              </p>
+            </div>
+            <EmailOtpForm context="topic" />
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   // ── Thread view ──
   if (selectedTopic) {
     return (
