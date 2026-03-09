@@ -187,15 +187,6 @@ const EmailOtpForm = ({ context }: { context: "topic" | "reply" }) => {
   );
 };
 
-
-
-  const formatRemaining = (ms: number) => {
-    const totalSec = Math.ceil(ms / 1000);
-    const m = Math.floor(totalSec / 60);
-    const s = totalSec % 60;
-    return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
-  };
-
   const parseRetryAfterMs = (msg?: string | null) => {
     if (!msg) return null;
     // Try to extract something like "after 10 minutes" / "pēc 10 minūtēm" / "10 min"
