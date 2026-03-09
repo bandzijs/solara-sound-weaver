@@ -50,20 +50,24 @@ const EmailOtpForm = ({ context }: { context: "topic" | "reply" }) => {
     const { error: otpError } = await signInWithOtp(trimmedEmail);
 
     if (otpError) {
-      const isRateLimit =
-        otpError.message?.includes("429") ||
-        otpError.message?.toLowerCase().includes("rate") ||
-        (otpError as any)?.status === 429;
+      const errAny = otpError as any;
+      const code = errAny?.code as string | undefined;
+      const msg = (otpError.message ?? "").toLowerCase();
 
-      // Do not block the user with a client-side cooldown and do not show the "too many attempts" message.
-      // If a user already has a code in their email, they can still proceed to verification.
+      const isRateLimit =
+        code === "over_email_send_rate_limit" ||
+        otpError.message?.includes("429") ||
+        msg.includes("rate") ||
+        errAny?.status === 429;
+
+      // Important: do NOT auto-switch to code step when sending was blocked by rate limit.
+      // If user already has a valid code, they can use the "Man jau ir kods" action.
       if (isRateLimit) {
         setNotice(
           lang === "lv"
-            ? "Ja kods jau ir e-pastā, ievadi to zemāk. Ja neesi saņēmis kodu — pamēģini vēlāk."
-            : "If you already have a code in your email, enter it below. If you didn't receive a code, try again later.",
+            ? "E-pasta sūtīšana šobrīd ir limitēta; pagaidi un mēģini vēlāk, vai spied “Man jau ir kods”, ja to jau saņēmi."
+            : "Email sending is rate-limited right now; wait and try later, or press “I already have a code” if you already received one.",
         );
-        setStep("code");
       } else {
         setError(otpError.message);
       }
