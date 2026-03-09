@@ -31,32 +31,161 @@ const EmailOtpForm = ({ context }: { context: "topic" | "reply" }) => {
   const { lang } = useLanguage();
   const { signInWithOtp, verifyOtp } = useAuth();
 
-  const COOLDOWN_MS = 10 * 60 * 1000;
-  // Small buffer to avoid clock skew/network latency causing a "0:00" retry that still hits provider rate limits
-  const COOLDOWN_BUFFER_MS = 15 * 1000;
-
-  const cooldownKeyFor = (e: string) => `otp_cooldown_until:${e.trim().toLowerCase()}`;
-
   const [email, setEmail] = useState("");
   const [otpCode, setOtpCode] = useState("");
   const [step, setStep] = useState<"email" | "code">("email");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState<string>("");
 
-  const [cooldownUntil, setCooldownUntil] = useState<number | null>(null);
-  const [now, setNow] = useState(() => Date.now());
+  const handleSendCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail) return;
 
-  useEffect(() => {
-    const id = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => window.clearInterval(id);
-  }, []);
+    setSending(true);
+    setError("");
+    setNotice("");
 
-  const readCooldownUntil = (e: string) => {
-    const key = cooldownKeyFor(e);
-    const raw = typeof window !== "undefined" ? window.localStorage.getItem(key) : null;
-    const parsed = raw ? Number(raw) : NaN;
-    return Number.isFinite(parsed) ? parsed : null;
+    const { error: otpError } = await signInWithOtp(trimmedEmail);
+
+    if (otpError) {
+      const isRateLimit =
+        otpError.message?.includes("429") ||
+        otpError.message?.toLowerCase().includes("rate") ||
+        (otpError as any)?.status === 429;
+
+      // Do not block the user with a client-side cooldown and do not show the "too many attempts" message.
+      // If a user already has a code in their email, they can still proceed to verification.
+      if (isRateLimit) {
+        setNotice(
+          lang === "lv"
+            ? "Ja kods jau ir e-pastā, ievadi to zemāk. Ja neesi saņēmis kodu — pamēģini vēlāk."
+            : "If you already have a code in your email, enter it below. If you didn't receive a code, try again later.",
+        );
+        setStep("code");
+      } else {
+        setError(otpError.message);
+      }
+    } else {
+      setStep("code");
+    }
+
+    setSending(false);
   };
+
+  const handleVerifyCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmedEmail = email.trim();
+    if (!otpCode.trim() || otpCode.length < 6 || otpCode.length > 8 || !trimmedEmail) return;
+
+    setSending(true);
+    setError("");
+
+    const { error: verifyError } = await verifyOtp(trimmedEmail, otpCode.trim());
+
+    if (verifyError) {
+      const isRateLimit =
+        verifyError.message?.includes("429") ||
+        verifyError.message?.toLowerCase().includes("rate") ||
+        (verifyError as any)?.status === 429;
+
+      setError(
+        isRateLimit
+          ? lang === "lv"
+            ? "Neizdevās apstiprināt kodu. Pamēģini vēlāk."
+            : "Couldn't verify the code. Please try again later."
+          : verifyError.message,
+      );
+    }
+
+    setSending(false);
+  };
+
+  if (step === "code") {
+    return (
+      <div className="w-full space-y-3">
+        <div className="py-4 px-5 rounded-xl border border-primary/30 bg-primary/5 text-center">
+          <Mail className="w-5 h-5 text-primary mx-auto mb-2" />
+          <p className="font-body text-sm text-primary tracking-wide">
+            {lang === "lv" ? "Ievadi kodu" : "Enter the code"}
+          </p>
+          <p className="font-body text-xs text-muted-foreground mt-1">
+            {lang === "lv" ? `Pārbaudi ${email} un ievadi kodu.` : `Check ${email} and enter the code.`}
+          </p>
+          {notice && <p className="font-body text-xs text-muted-foreground mt-2">{notice}</p>}
+        </div>
+        <form onSubmit={handleVerifyCode} className="flex gap-2">
+          <input
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            maxLength={8}
+            required
+            value={otpCode}
+            onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 8))}
+            placeholder={lang === "lv" ? "Kods" : "Code"}
+            autoFocus
+            className="flex-1 bg-card/40 border border-border rounded-lg px-4 py-2.5 font-body text-foreground text-sm text-center tracking-[0.3em] focus:border-primary focus:outline-none transition-colors"
+          />
+          <button
+            type="submit"
+            disabled={sending || otpCode.length < 6 || otpCode.length > 8}
+            className="px-5 py-2.5 rounded-lg border border-primary text-primary font-body text-sm tracking-widest hover:bg-primary hover:text-primary-foreground transition-all duration-300 disabled:opacity-50 whitespace-nowrap"
+          >
+            {sending ? "..." : lang === "lv" ? "Apstiprināt" : "Verify"}
+          </button>
+        </form>
+        <button
+          type="button"
+          onClick={() => {
+            setStep("email");
+            setOtpCode("");
+            setError("");
+            setNotice("");
+          }}
+          className="text-xs font-body text-muted-foreground hover:text-primary transition-colors"
+        >
+          {lang === "lv" ? "← Mainīt e-pastu" : "← Change email"}
+        </button>
+        {error && <p className="font-body text-xs text-destructive">{error}</p>}
+      </div>
+    );
+  }
+
+  const label =
+    context === "topic"
+      ? lang === "lv"
+        ? "Ievadiet e-pastu, lai izveidotu tēmu"
+        : "Enter email to create a topic"
+      : lang === "lv"
+        ? "Ievadiet e-pastu, lai atbildētu"
+        : "Enter email to reply";
+
+  return (
+    <form onSubmit={handleSendCode} className="w-full space-y-2">
+      <p className="font-body text-xs text-muted-foreground tracking-wide">{label}</p>
+      <div className="flex gap-2">
+        <input
+          type="email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="you@example.com"
+          className="flex-1 bg-card/40 border border-border rounded-lg px-4 py-2.5 font-body text-foreground text-sm focus:border-primary focus:outline-none transition-colors"
+        />
+        <button
+          type="submit"
+          disabled={sending || !email.trim()}
+          className="px-5 py-2.5 rounded-lg border border-primary text-primary font-body text-sm tracking-widest hover:bg-primary hover:text-primary-foreground transition-all duration-300 disabled:opacity-50 whitespace-nowrap"
+        >
+          {sending ? "..." : lang === "lv" ? "Nosūtīt kodu" : "Send code"}
+        </button>
+      </div>
+      {error && <p className="font-body text-xs text-destructive">{error}</p>}
+    </form>
+  );
+};
 
   const writeCooldownUntil = (e: string, until: number) => {
     const key = cooldownKeyFor(e);
