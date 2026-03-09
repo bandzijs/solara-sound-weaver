@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
-import { MessageSquare, Plus, ArrowLeft, Trash2, Mail } from "lucide-react";
+import { MessageSquare, Plus, ArrowLeft, Trash2, Mail, Heart, Search } from "lucide-react";
 import NicknameModal from "@/components/NicknameModal";
 
 interface Topic {
