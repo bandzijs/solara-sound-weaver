@@ -23,6 +23,8 @@ interface Comment {
   user_id: string;
   created_at: string;
   avatar_url?: string;
+  like_count?: number;
+  user_has_liked?: boolean;
 }
 
 const EmailOtpForm = ({ context }: { context: "topic" | "reply" }) => {
