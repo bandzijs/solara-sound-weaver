@@ -369,7 +369,7 @@ const Forum = () => {
     const { data, error } = await supabase
       .from("topics")
       .insert([{
-        title: newTopicTitle.trim(),
+        title: newTopicTitle.trim().slice(0, 100),
         author_name: displayName,
         author_avatar: avatarUrl || null,
         user_id: user.id,
@@ -378,17 +378,26 @@ const Forum = () => {
       .single();
 
     if (!error && data) {
-      await supabase.from("comments").insert([{
+      const { data: commentData } = await supabase.from("comments").insert([{
         topic_id: data.id,
-        message: newTopicMessage.trim(),
+        message: newTopicMessage.trim().slice(0, 50),
         author_name: displayName,
         user_id: user.id,
         avatar_url: avatarUrl || null,
-      }]);
+      }]).select().single();
 
       setNewTopicTitle("");
       setNewTopicMessage("");
       setShowNewTopic(false);
+      
+      // Open the newly created topic so user sees their message
+      const newTopic: Topic = { ...data, comment_count: 1 };
+      setSelectedTopic(newTopic);
+      if (commentData) {
+        setComments([{ ...commentData, like_count: 0, user_has_liked: false }]);
+      } else {
+        fetchComments(data.id);
+      }
       fetchTopics();
     }
     setSaving(false);
