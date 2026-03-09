@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
-import { Instagram, Youtube, Save } from "lucide-react";
+import { Instagram, Youtube, Save, Send } from "lucide-react";
 
 interface SocialLink {
   id: string;
@@ -27,6 +27,11 @@ const PLATFORM_META: Record<string, { label: string; icon: React.ReactNode; plac
       </svg>
     ),
     placeholder: "https://open.spotify.com/artist/...",
+  },
+  telegram: {
+    label: "Telegram",
+    icon: <Send className="w-4 h-4" />,
+    placeholder: "https://t.me/yourChannel",
   },
 };
 

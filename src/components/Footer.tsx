@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Instagram, Youtube, Mail, Phone } from "lucide-react";
+import { Instagram, Youtube, Mail, Phone, Send } from "lucide-react";
 import { useAdmin } from "@/contexts/AdminContext";
 import { supabase } from "@/lib/supabase";
 
@@ -61,6 +61,11 @@ const Footer = () => {
         </svg>
       ),
       label: "Spotify",
+    },
+    {
+      platform: "telegram",
+      icon: <Send className="w-5 h-5" />,
+      label: "Telegram",
     },
   ];
 
