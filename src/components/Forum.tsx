@@ -615,22 +615,30 @@ const Forum = () => {
           </div>
 
           {user ? (
-            <form onSubmit={handlePostComment} className="flex gap-3">
-              <input
-                type="text"
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                placeholder={lang === "lv" ? "Raksti atbildi..." : "Write a reply..."}
-                className="flex-1 bg-card/40 border border-border rounded-lg px-4 py-2.5 font-body text-foreground text-sm focus:border-primary focus:outline-none transition-colors"
-              />
-              <button
-                type="submit"
-                disabled={saving || !newComment.trim()}
-                className="px-5 py-2.5 rounded-lg border border-primary text-primary font-body text-sm tracking-widest hover:bg-primary hover:text-primary-foreground transition-all duration-300 disabled:opacity-50"
-              >
-                {lang === "lv" ? "Atbildēt" : "Reply"}
-              </button>
-            </form>
+            <div className="space-y-2">
+              <form onSubmit={handlePostComment} className="flex gap-3">
+                <input
+                  type="text"
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value.slice(0, 50))}
+                  placeholder={lang === "lv" ? "Raksti atbildi..." : "Write a reply..."}
+                  maxLength={50}
+                  className="flex-1 bg-card/40 border border-border rounded-lg px-4 py-2.5 font-body text-foreground text-sm focus:border-primary focus:outline-none transition-colors"
+                />
+                <button
+                  type="submit"
+                  disabled={saving || !newComment.trim()}
+                  className="px-5 py-2.5 rounded-lg border border-primary text-primary font-body text-sm tracking-widest hover:bg-primary hover:text-primary-foreground transition-all duration-300 disabled:opacity-50"
+                >
+                  {lang === "lv" ? "Atbildēt" : "Reply"}
+                </button>
+              </form>
+              {newComment && (
+                <div className="text-right text-xs text-muted-foreground">
+                  {newComment.length}/50
+                </div>
+              )}
+            </div>
           ) : (
             <EmailOtpForm context="reply" />
           )}
