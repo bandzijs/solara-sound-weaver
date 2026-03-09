@@ -412,7 +412,7 @@ const Forum = () => {
       .from("comments")
       .insert([{
         topic_id: selectedTopic.id,
-        message: newComment.trim(),
+        message: newComment.trim().slice(0, 50),
         author_name: displayName,
         user_id: user.id,
         avatar_url: avatarUrl || null,
@@ -421,7 +421,7 @@ const Forum = () => {
       .single();
 
     if (!error && data) {
-      setComments((prev) => [...prev, data]);
+      setComments((prev) => [...prev, { ...data, like_count: 0, user_has_liked: false }]);
       setNewComment("");
     }
     setSaving(false);
