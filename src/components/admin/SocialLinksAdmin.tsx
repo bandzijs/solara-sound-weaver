@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
-import { Instagram, Youtube, Save } from "lucide-react";
+import { Instagram, Youtube, Save, Send } from "lucide-react";
 
 interface SocialLink {
   id: string;
