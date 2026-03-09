@@ -50,20 +50,24 @@ const EmailOtpForm = ({ context }: { context: "topic" | "reply" }) => {
     const { error: otpError } = await signInWithOtp(trimmedEmail);
 
     if (otpError) {
-      const isRateLimit =
-        otpError.message?.includes("429") ||
-        otpError.message?.toLowerCase().includes("rate") ||
-        (otpError as any)?.status === 429;
+      const errAny = otpError as any;
+      const code = errAny?.code as string | undefined;
+      const msg = (otpError.message ?? "").toLowerCase();
 
-      // Do not block the user with a client-side cooldown and do not show the "too many attempts" message.
-      // If a user already has a code in their email, they can still proceed to verification.
+      const isRateLimit =
+        code === "over_email_send_rate_limit" ||
+        otpError.message?.includes("429") ||
+        msg.includes("rate") ||
+        errAny?.status === 429;
+
+      // Important: do NOT auto-switch to code step when sending was blocked by rate limit.
+      // If user already has a valid code, they can use the "Man jau ir kods" action.
       if (isRateLimit) {
         setNotice(
           lang === "lv"
-            ? "Ja kods jau ir e-pastā, ievadi to zemāk. Ja neesi saņēmis kodu — pamēģini vēlāk."
-            : "If you already have a code in your email, enter it below. If you didn't receive a code, try again later.",
+            ? "E-pasta sūtīšana šobrīd ir limitēta; pagaidi un mēģini vēlāk, vai spied “Man jau ir kods”, ja to jau saņēmi."
+            : "Email sending is rate-limited right now; wait and try later, or press “I already have a code” if you already received one.",
         );
-        setStep("code");
       } else {
         setError(otpError.message);
       }
@@ -85,17 +89,26 @@ const EmailOtpForm = ({ context }: { context: "topic" | "reply" }) => {
     const { error: verifyError } = await verifyOtp(trimmedEmail, otpCode.trim());
 
     if (verifyError) {
+      const errAny = verifyError as any;
+      const code = errAny?.code as string | undefined;
+      const msg = (verifyError.message ?? "").toLowerCase();
+
       const isRateLimit =
-        verifyError.message?.includes("429") ||
-        verifyError.message?.toLowerCase().includes("rate") ||
-        (verifyError as any)?.status === 429;
+        verifyError.message?.includes("429") || msg.includes("rate") || errAny?.status === 429;
+
+      const isExpiredOrInvalid =
+        code === "otp_expired" || msg.includes("expired") || msg.includes("invalid");
 
       setError(
         isRateLimit
           ? lang === "lv"
             ? "Neizdevās apstiprināt kodu. Pamēģini vēlāk."
             : "Couldn't verify the code. Please try again later."
-          : verifyError.message,
+          : isExpiredOrInvalid
+            ? lang === "lv"
+              ? "Šis kods vairs nav derīgs (vai ir novecojis) — pieprasi jaunu kodu un ievadi tieši pēdējo saņemto."
+              : "This code is no longer valid (or expired) — request a new one and enter the latest code you received."
+            : verifyError.message,
       );
     }
 
@@ -182,6 +195,18 @@ const EmailOtpForm = ({ context }: { context: "topic" | "reply" }) => {
           {sending ? "..." : lang === "lv" ? "Nosūtīt kodu" : "Send code"}
         </button>
       </div>
+      {notice && <p className="font-body text-xs text-muted-foreground">{notice}</p>}
+      <button
+        type="button"
+        onClick={() => {
+          if (!email.trim()) return;
+          setStep("code");
+          setError("");
+        }}
+        className="text-xs font-body text-muted-foreground hover:text-primary transition-colors"
+      >
+        {lang === "lv" ? "Man jau ir kods" : "I already have a code"}
+      </button>
       {error && <p className="font-body text-xs text-destructive">{error}</p>}
     </form>
   );
