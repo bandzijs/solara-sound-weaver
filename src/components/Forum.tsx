@@ -251,7 +251,33 @@ const Forum = () => {
       .eq("topic_id", topicId)
       .order("created_at", { ascending: true });
 
-    if (data) setComments(data);
+    if (data && user) {
+      // Fetch like counts and user likes
+      const commentIds = data.map(c => c.id);
+      const { data: likes } = await supabase
+        .from("comment_likes")
+        .select("comment_id, user_id");
+
+      const likeCounts: Record<string, number> = {};
+      const userLikes = new Set<string>();
+
+      likes?.forEach(like => {
+        likeCounts[like.comment_id] = (likeCounts[like.comment_id] || 0) + 1;
+        if (like.user_id === user.id) {
+          userLikes.add(like.comment_id);
+        }
+      });
+
+      const commentsWithLikes = data.map(c => ({
+        ...c,
+        like_count: likeCounts[c.id] || 0,
+        user_has_liked: userLikes.has(c.id)
+      }));
+
+      setComments(commentsWithLikes);
+    } else if (data) {
+      setComments(data.map(c => ({ ...c, like_count: 0, user_has_liked: false })));
+    }
   };
 
   const openTopic = (topic: Topic) => {
