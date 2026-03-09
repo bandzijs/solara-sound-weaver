@@ -89,17 +89,26 @@ const EmailOtpForm = ({ context }: { context: "topic" | "reply" }) => {
     const { error: verifyError } = await verifyOtp(trimmedEmail, otpCode.trim());
 
     if (verifyError) {
+      const errAny = verifyError as any;
+      const code = errAny?.code as string | undefined;
+      const msg = (verifyError.message ?? "").toLowerCase();
+
       const isRateLimit =
-        verifyError.message?.includes("429") ||
-        verifyError.message?.toLowerCase().includes("rate") ||
-        (verifyError as any)?.status === 429;
+        verifyError.message?.includes("429") || msg.includes("rate") || errAny?.status === 429;
+
+      const isExpiredOrInvalid =
+        code === "otp_expired" || msg.includes("expired") || msg.includes("invalid");
 
       setError(
         isRateLimit
           ? lang === "lv"
             ? "Neizdevās apstiprināt kodu. Pamēģini vēlāk."
             : "Couldn't verify the code. Please try again later."
-          : verifyError.message,
+          : isExpiredOrInvalid
+            ? lang === "lv"
+              ? "Šis kods vairs nav derīgs (vai ir novecojis) — pieprasi jaunu kodu un ievadi tieši pēdējo saņemto."
+              : "This code is no longer valid (or expired) — request a new one and enter the latest code you received."
+            : verifyError.message,
       );
     }
 
