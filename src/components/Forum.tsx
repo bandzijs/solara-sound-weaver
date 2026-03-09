@@ -251,33 +251,47 @@ const Forum = () => {
       .eq("topic_id", topicId)
       .order("created_at", { ascending: true });
 
-    if (data && user) {
-      // Fetch like counts and user likes
-      const commentIds = data.map(c => c.id);
-      const { data: likes } = await supabase
-        .from("comment_likes")
-        .select("comment_id, user_id");
-
-      const likeCounts: Record<string, number> = {};
-      const userLikes = new Set<string>();
-
-      likes?.forEach(like => {
-        likeCounts[like.comment_id] = (likeCounts[like.comment_id] || 0) + 1;
-        if (like.user_id === user.id) {
-          userLikes.add(like.comment_id);
-        }
-      });
-
-      const commentsWithLikes = data.map(c => ({
-        ...c,
-        like_count: likeCounts[c.id] || 0,
-        user_has_liked: userLikes.has(c.id)
-      }));
-
-      setComments(commentsWithLikes);
-    } else if (data) {
-      setComments(data.map(c => ({ ...c, like_count: 0, user_has_liked: false })));
+    if (!data) {
+      setComments([]);
+      return;
     }
+
+    // Try to fetch likes (table might not exist yet)
+    try {
+      if (user) {
+        const commentIds = data.map(c => c.id);
+        const { data: likes, error } = await supabase
+          .from("comment_likes")
+          .select("comment_id, user_id")
+          .in("comment_id", commentIds);
+
+        if (!error && likes) {
+          const likeCounts: Record<string, number> = {};
+          const userLikes = new Set<string>();
+
+          likes.forEach(like => {
+            likeCounts[like.comment_id] = (likeCounts[like.comment_id] || 0) + 1;
+            if (like.user_id === user.id) {
+              userLikes.add(like.comment_id);
+            }
+          });
+
+          const commentsWithLikes = data.map(c => ({
+            ...c,
+            like_count: likeCounts[c.id] || 0,
+            user_has_liked: userLikes.has(c.id)
+          }));
+
+          setComments(commentsWithLikes);
+          return;
+        }
+      }
+    } catch (error) {
+      console.log("Like system not ready yet - table might not exist");
+    }
+
+    // Fallback if likes table doesn't exist or user not logged in
+    setComments(data.map(c => ({ ...c, like_count: 0, user_has_liked: false })));
   };
 
   const openTopic = (topic: Topic) => {
@@ -358,7 +372,7 @@ const Forum = () => {
     }
   };
 
-  const canDelete = (ownerId: string) => isAdmin || user?.id === ownerId;
+  const canDelete = (ownerId: string) => isAdmin;
 
   const handleLikeComment = async (commentId: string, currentlyLiked: boolean) => {
     if (!user) return;
