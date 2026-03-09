@@ -369,7 +369,7 @@ const Forum = () => {
     const { data, error } = await supabase
       .from("topics")
       .insert([{
-        title: newTopicTitle.trim(),
+        title: newTopicTitle.trim().slice(0, 100),
         author_name: displayName,
         author_avatar: avatarUrl || null,
         user_id: user.id,
@@ -378,17 +378,26 @@ const Forum = () => {
       .single();
 
     if (!error && data) {
-      await supabase.from("comments").insert([{
+      const { data: commentData } = await supabase.from("comments").insert([{
         topic_id: data.id,
-        message: newTopicMessage.trim(),
+        message: newTopicMessage.trim().slice(0, 50),
         author_name: displayName,
         user_id: user.id,
         avatar_url: avatarUrl || null,
-      }]);
+      }]).select().single();
 
       setNewTopicTitle("");
       setNewTopicMessage("");
       setShowNewTopic(false);
+      
+      // Open the newly created topic so user sees their message
+      const newTopic: Topic = { ...data, comment_count: 1 };
+      setSelectedTopic(newTopic);
+      if (commentData) {
+        setComments([{ ...commentData, like_count: 0, user_has_liked: false }]);
+      } else {
+        fetchComments(data.id);
+      }
       fetchTopics();
     }
     setSaving(false);
@@ -403,7 +412,7 @@ const Forum = () => {
       .from("comments")
       .insert([{
         topic_id: selectedTopic.id,
-        message: newComment.trim(),
+        message: newComment.trim().slice(0, 50),
         author_name: displayName,
         user_id: user.id,
         avatar_url: avatarUrl || null,
@@ -412,7 +421,7 @@ const Forum = () => {
       .single();
 
     if (!error && data) {
-      setComments((prev) => [...prev, data]);
+      setComments((prev) => [...prev, { ...data, like_count: 0, user_has_liked: false }]);
       setNewComment("");
     }
     setSaving(false);
@@ -606,22 +615,30 @@ const Forum = () => {
           </div>
 
           {user ? (
-            <form onSubmit={handlePostComment} className="flex gap-3">
-              <input
-                type="text"
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                placeholder={lang === "lv" ? "Raksti atbildi..." : "Write a reply..."}
-                className="flex-1 bg-card/40 border border-border rounded-lg px-4 py-2.5 font-body text-foreground text-sm focus:border-primary focus:outline-none transition-colors"
-              />
-              <button
-                type="submit"
-                disabled={saving || !newComment.trim()}
-                className="px-5 py-2.5 rounded-lg border border-primary text-primary font-body text-sm tracking-widest hover:bg-primary hover:text-primary-foreground transition-all duration-300 disabled:opacity-50"
-              >
-                {lang === "lv" ? "Atbildēt" : "Reply"}
-              </button>
-            </form>
+            <div className="space-y-2">
+              <form onSubmit={handlePostComment} className="flex gap-3">
+                <input
+                  type="text"
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value.slice(0, 50))}
+                  placeholder={lang === "lv" ? "Raksti atbildi..." : "Write a reply..."}
+                  maxLength={50}
+                  className="flex-1 bg-card/40 border border-border rounded-lg px-4 py-2.5 font-body text-foreground text-sm focus:border-primary focus:outline-none transition-colors"
+                />
+                <button
+                  type="submit"
+                  disabled={saving || !newComment.trim()}
+                  className="px-5 py-2.5 rounded-lg border border-primary text-primary font-body text-sm tracking-widest hover:bg-primary hover:text-primary-foreground transition-all duration-300 disabled:opacity-50"
+                >
+                  {lang === "lv" ? "Atbildēt" : "Reply"}
+                </button>
+              </form>
+              {newComment && (
+                <div className="text-right text-xs text-muted-foreground">
+                  {newComment.length}/50
+                </div>
+              )}
+            </div>
           ) : (
             <EmailOtpForm context="reply" />
           )}
@@ -659,13 +676,19 @@ const Forum = () => {
                   autoFocus
                   className="w-full bg-card/40 border border-border rounded-lg px-4 py-2.5 font-body text-foreground text-sm focus:border-primary focus:outline-none transition-colors"
                 />
-                <textarea
-                  value={newTopicMessage}
-                  onChange={(e) => setNewTopicMessage(e.target.value)}
-                  placeholder={lang === "lv" ? "Pirmā ziņa..." : "First message..."}
-                  rows={3}
-                  className="w-full bg-card/40 border border-border rounded-lg px-4 py-2.5 font-body text-foreground text-sm focus:border-primary focus:outline-none transition-colors resize-none"
-                />
+                <div className="space-y-1">
+                  <textarea
+                    value={newTopicMessage}
+                    onChange={(e) => setNewTopicMessage(e.target.value.slice(0, 50))}
+                    placeholder={lang === "lv" ? "Pirmā ziņa..." : "First message..."}
+                    rows={3}
+                    maxLength={50}
+                    className="w-full bg-card/40 border border-border rounded-lg px-4 py-2.5 font-body text-foreground text-sm focus:border-primary focus:outline-none transition-colors resize-none"
+                  />
+                  <div className="text-right text-xs text-muted-foreground">
+                    {newTopicMessage.length}/50
+                  </div>
+                </div>
                 <div className="flex gap-3">
                   <button
                     type="submit"
