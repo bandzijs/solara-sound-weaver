@@ -187,25 +187,6 @@ const EmailOtpForm = ({ context }: { context: "topic" | "reply" }) => {
   );
 };
 
-  const writeCooldownUntil = (e: string, until: number) => {
-    const key = cooldownKeyFor(e);
-    if (typeof window === "undefined") return;
-    window.localStorage.setItem(key, String(until));
-  };
-
-  const clearCooldownUntil = (e: string) => {
-    const key = cooldownKeyFor(e);
-    if (typeof window === "undefined") return;
-    window.localStorage.removeItem(key);
-  };
-
-  useEffect(() => {
-    if (!email.trim()) {
-      setCooldownUntil(null);
-      return;
-    }
-    setCooldownUntil(readCooldownUntil(email));
-  }, [email]);
 
   useEffect(() => {
     if (!email.trim() || !cooldownUntil) return;
