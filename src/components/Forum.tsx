@@ -456,6 +456,21 @@ const Forum = () => {
                     <span className="text-[10px] font-body text-muted-foreground">{formatDate(c.created_at)}</span>
                   </div>
                   <p className="font-body text-sm text-foreground/70 mt-1 whitespace-pre-wrap">{c.message}</p>
+                  {user && (
+                    <button
+                      onClick={() => handleLikeComment(c.id, c.user_has_liked || false)}
+                      className="flex items-center gap-1.5 mt-2 text-xs font-body text-muted-foreground hover:text-primary transition-colors group"
+                    >
+                      <Heart 
+                        className={`w-3.5 h-3.5 transition-all ${
+                          c.user_has_liked 
+                            ? 'fill-primary text-primary' 
+                            : 'group-hover:fill-primary/20'
+                        }`} 
+                      />
+                      <span>{c.like_count || 0}</span>
+                    </button>
+                  )}
                 </div>
                 {canDelete(c.user_id) && (
                   <button
