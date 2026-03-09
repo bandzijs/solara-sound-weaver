@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
-import { MessageSquare, Plus, ArrowLeft, Trash2, Mail } from "lucide-react";
+import { MessageSquare, Plus, ArrowLeft, Trash2, Mail, Heart, Search } from "lucide-react";
 import NicknameModal from "@/components/NicknameModal";
 
 interface Topic {
@@ -23,6 +23,8 @@ interface Comment {
   user_id: string;
   created_at: string;
   avatar_url?: string;
+  like_count?: number;
+  user_has_liked?: boolean;
 }
 
 const EmailOtpForm = ({ context }: { context: "topic" | "reply" }) => {
@@ -163,6 +165,7 @@ const Forum = () => {
   const [showNewTopic, setShowNewTopic] = useState(false);
   const [newComment, setNewComment] = useState("");
   const [saving, setSaving] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     fetchTopics();
@@ -174,6 +177,45 @@ const Forum = () => {
     });
     return () => subscription.unsubscribe();
   }, []);
+
+  // Real-time subscriptions for topics
+  useEffect(() => {
+    const topicsChannel = supabase
+      .channel('topics-changes')
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'topics' 
+      }, () => {
+        fetchTopics();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(topicsChannel);
+    };
+  }, []);
+
+  // Real-time subscriptions for comments when viewing a topic
+  useEffect(() => {
+    if (!selectedTopic) return;
+
+    const commentsChannel = supabase
+      .channel(`comments-${selectedTopic.id}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'comments',
+        filter: `topic_id=eq.${selectedTopic.id}`
+      }, () => {
+        fetchComments(selectedTopic.id);
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(commentsChannel);
+    };
+  }, [selectedTopic]);
 
   async function fetchTopics() {
     setLoading(true);
@@ -209,7 +251,33 @@ const Forum = () => {
       .eq("topic_id", topicId)
       .order("created_at", { ascending: true });
 
-    if (data) setComments(data);
+    if (data && user) {
+      // Fetch like counts and user likes
+      const commentIds = data.map(c => c.id);
+      const { data: likes } = await supabase
+        .from("comment_likes")
+        .select("comment_id, user_id");
+
+      const likeCounts: Record<string, number> = {};
+      const userLikes = new Set<string>();
+
+      likes?.forEach(like => {
+        likeCounts[like.comment_id] = (likeCounts[like.comment_id] || 0) + 1;
+        if (like.user_id === user.id) {
+          userLikes.add(like.comment_id);
+        }
+      });
+
+      const commentsWithLikes = data.map(c => ({
+        ...c,
+        like_count: likeCounts[c.id] || 0,
+        user_has_liked: userLikes.has(c.id)
+      }));
+
+      setComments(commentsWithLikes);
+    } else if (data) {
+      setComments(data.map(c => ({ ...c, like_count: 0, user_has_liked: false })));
+    }
   };
 
   const openTopic = (topic: Topic) => {
@@ -292,6 +360,40 @@ const Forum = () => {
 
   const canDelete = (ownerId: string) => isAdmin || user?.id === ownerId;
 
+  const handleLikeComment = async (commentId: string, currentlyLiked: boolean) => {
+    if (!user) return;
+
+    if (currentlyLiked) {
+      // Unlike
+      await supabase
+        .from("comment_likes")
+        .delete()
+        .eq("comment_id", commentId)
+        .eq("user_id", user.id);
+    } else {
+      // Like
+      await supabase
+        .from("comment_likes")
+        .insert({ comment_id: commentId, user_id: user.id });
+    }
+
+    // Update local state
+    setComments(prev => prev.map(c => 
+      c.id === commentId 
+        ? { 
+            ...c, 
+            like_count: (c.like_count || 0) + (currentlyLiked ? -1 : 1),
+            user_has_liked: !currentlyLiked 
+          }
+        : c
+    ));
+  };
+
+  const filteredTopics = topics.filter(topic => 
+    topic.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    topic.author_name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   const formatDate = (dateStr: string) => {
     const d = new Date(dateStr);
     return d.toLocaleDateString(lang === "lv" ? "lv-LV" : "en-US", {
@@ -354,6 +456,21 @@ const Forum = () => {
                     <span className="text-[10px] font-body text-muted-foreground">{formatDate(c.created_at)}</span>
                   </div>
                   <p className="font-body text-sm text-foreground/70 mt-1 whitespace-pre-wrap">{c.message}</p>
+                  {user && (
+                    <button
+                      onClick={() => handleLikeComment(c.id, c.user_has_liked || false)}
+                      className="flex items-center gap-1.5 mt-2 text-xs font-body text-muted-foreground hover:text-primary transition-colors group"
+                    >
+                      <Heart 
+                        className={`w-3.5 h-3.5 transition-all ${
+                          c.user_has_liked 
+                            ? 'fill-primary text-primary' 
+                            : 'group-hover:fill-primary/20'
+                        }`} 
+                      />
+                      <span>{c.like_count || 0}</span>
+                    </button>
+                  )}
                 </div>
                 {canDelete(c.user_id) && (
                   <button
@@ -467,16 +584,31 @@ const Forum = () => {
           </div>
         )}
 
+        {/* Search bar */}
+        <div className="mb-6 relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={lang === "lv" ? "Meklēt tēmas vai autorus..." : "Search topics or authors..."}
+            className="w-full bg-card/40 border border-border rounded-lg pl-10 pr-4 py-2.5 font-body text-foreground text-sm focus:border-primary focus:outline-none transition-colors"
+          />
+        </div>
+
         {/* Topic list */}
         {loading ? (
           <p className="text-center text-muted-foreground font-body text-sm">Loading...</p>
-        ) : topics.length === 0 ? (
+        ) : filteredTopics.length === 0 ? (
           <p className="text-center text-muted-foreground font-body text-sm py-8">
-            {lang === "lv" ? "Vēl nav tēmu. Esi pirmais!" : "No topics yet. Be the first!"}
+            {searchQuery 
+              ? (lang === "lv" ? "Nav rezultātu." : "No results found.")
+              : (lang === "lv" ? "Vēl nav tēmu. Esi pirmais!" : "No topics yet. Be the first!")
+            }
           </p>
         ) : (
           <div className="space-y-3">
-            {topics.map((topic) => (
+            {filteredTopics.map((topic) => (
               <div
                 key={topic.id}
                 onClick={() => openTopic(topic)}
