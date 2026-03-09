@@ -584,16 +584,31 @@ const Forum = () => {
           </div>
         )}
 
+        {/* Search bar */}
+        <div className="mb-6 relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={lang === "lv" ? "Meklēt tēmas vai autorus..." : "Search topics or authors..."}
+            className="w-full bg-card/40 border border-border rounded-lg pl-10 pr-4 py-2.5 font-body text-foreground text-sm focus:border-primary focus:outline-none transition-colors"
+          />
+        </div>
+
         {/* Topic list */}
         {loading ? (
           <p className="text-center text-muted-foreground font-body text-sm">Loading...</p>
-        ) : topics.length === 0 ? (
+        ) : filteredTopics.length === 0 ? (
           <p className="text-center text-muted-foreground font-body text-sm py-8">
-            {lang === "lv" ? "Vēl nav tēmu. Esi pirmais!" : "No topics yet. Be the first!"}
+            {searchQuery 
+              ? (lang === "lv" ? "Nav rezultātu." : "No results found.")
+              : (lang === "lv" ? "Vēl nav tēmu. Esi pirmais!" : "No topics yet. Be the first!")
+            }
           </p>
         ) : (
           <div className="space-y-3">
-            {topics.map((topic) => (
+            {filteredTopics.map((topic) => (
               <div
                 key={topic.id}
                 onClick={() => openTopic(topic)}
