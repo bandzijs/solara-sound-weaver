@@ -32,6 +32,9 @@ const EmailOtpForm = ({ context }: { context: "topic" | "reply" }) => {
   const { signInWithOtp, verifyOtp } = useAuth();
 
   const COOLDOWN_MS = 10 * 60 * 1000;
+  // Small buffer to avoid clock skew/network latency causing a "0:00" retry that still hits provider rate limits
+  const COOLDOWN_BUFFER_MS = 15 * 1000;
+
   const cooldownKeyFor = (e: string) => `otp_cooldown_until:${e.trim().toLowerCase()}`;
 
   const [email, setEmail] = useState("");
@@ -94,6 +97,19 @@ const EmailOtpForm = ({ context }: { context: "topic" | "reply" }) => {
     return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
   };
 
+  const parseRetryAfterMs = (msg?: string | null) => {
+    if (!msg) return null;
+    // Try to extract something like "after 10 minutes" / "pēc 10 minūtēm" / "10 min"
+    const m = msg.match(/(\d{1,4})\s*(seconds?|secs?|s|minutes?|mins?|min|sekundes?|sek|s\.|minūtes?|min\.)/i);
+    if (!m) return null;
+    const n = Number(m[1]);
+    if (!Number.isFinite(n) || n <= 0) return null;
+    const unit = m[2].toLowerCase();
+    const isMinute = unit.includes("min") || unit.includes("minū");
+    const unitMs = isMinute ? 60_000 : 1_000;
+    return n * unitMs;
+  };
+
   const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
     const trimmedEmail = email.trim();
@@ -123,7 +139,10 @@ const EmailOtpForm = ({ context }: { context: "topic" | "reply" }) => {
         (otpError as any)?.status === 429;
 
       if (isRateLimit) {
-        const until = Math.max(Date.now() + COOLDOWN_MS, existingUntil ?? 0);
+        const retryMs = parseRetryAfterMs(otpError.message) ?? COOLDOWN_MS;
+        const baseUntil = Date.now() + retryMs + COOLDOWN_BUFFER_MS;
+        const until = Math.max(baseUntil, existingUntil ?? 0);
+
         writeCooldownUntil(trimmedEmail, until);
         setCooldownUntil(until);
         setError(
