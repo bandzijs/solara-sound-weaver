@@ -28,6 +28,11 @@ const PLATFORM_META: Record<string, { label: string; icon: React.ReactNode; plac
     ),
     placeholder: "https://open.spotify.com/artist/...",
   },
+  telegram: {
+    label: "Telegram",
+    icon: <Send className="w-4 h-4" />,
+    placeholder: "https://t.me/yourChannel",
+  },
 };
 
 const SocialLinksAdmin = () => {

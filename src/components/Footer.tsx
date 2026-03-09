@@ -62,6 +62,11 @@ const Footer = () => {
       ),
       label: "Spotify",
     },
+    {
+      platform: "telegram",
+      icon: <Send className="w-5 h-5" />,
+      label: "Telegram",
+    },
   ];
 
   return (
