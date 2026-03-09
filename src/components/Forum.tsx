@@ -165,6 +165,7 @@ const Forum = () => {
   const [showNewTopic, setShowNewTopic] = useState(false);
   const [newComment, setNewComment] = useState("");
   const [saving, setSaving] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     fetchTopics();
@@ -176,6 +177,45 @@ const Forum = () => {
     });
     return () => subscription.unsubscribe();
   }, []);
+
+  // Real-time subscriptions for topics
+  useEffect(() => {
+    const topicsChannel = supabase
+      .channel('topics-changes')
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'topics' 
+      }, () => {
+        fetchTopics();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(topicsChannel);
+    };
+  }, []);
+
+  // Real-time subscriptions for comments when viewing a topic
+  useEffect(() => {
+    if (!selectedTopic) return;
+
+    const commentsChannel = supabase
+      .channel(`comments-${selectedTopic.id}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'comments',
+        filter: `topic_id=eq.${selectedTopic.id}`
+      }, () => {
+        fetchComments(selectedTopic.id);
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(commentsChannel);
+    };
+  }, [selectedTopic]);
 
   async function fetchTopics() {
     setLoading(true);
