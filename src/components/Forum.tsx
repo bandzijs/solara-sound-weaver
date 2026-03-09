@@ -195,6 +195,18 @@ const EmailOtpForm = ({ context }: { context: "topic" | "reply" }) => {
           {sending ? "..." : lang === "lv" ? "Nosūtīt kodu" : "Send code"}
         </button>
       </div>
+      {notice && <p className="font-body text-xs text-muted-foreground">{notice}</p>}
+      <button
+        type="button"
+        onClick={() => {
+          if (!email.trim()) return;
+          setStep("code");
+          setError("");
+        }}
+        className="text-xs font-body text-muted-foreground hover:text-primary transition-colors"
+      >
+        {lang === "lv" ? "Man jau ir kods" : "I already have a code"}
+      </button>
       {error && <p className="font-body text-xs text-destructive">{error}</p>}
     </form>
   );
