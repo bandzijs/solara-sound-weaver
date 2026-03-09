@@ -360,6 +360,40 @@ const Forum = () => {
 
   const canDelete = (ownerId: string) => isAdmin || user?.id === ownerId;
 
+  const handleLikeComment = async (commentId: string, currentlyLiked: boolean) => {
+    if (!user) return;
+
+    if (currentlyLiked) {
+      // Unlike
+      await supabase
+        .from("comment_likes")
+        .delete()
+        .eq("comment_id", commentId)
+        .eq("user_id", user.id);
+    } else {
+      // Like
+      await supabase
+        .from("comment_likes")
+        .insert({ comment_id: commentId, user_id: user.id });
+    }
+
+    // Update local state
+    setComments(prev => prev.map(c => 
+      c.id === commentId 
+        ? { 
+            ...c, 
+            like_count: (c.like_count || 0) + (currentlyLiked ? -1 : 1),
+            user_has_liked: !currentlyLiked 
+          }
+        : c
+    ));
+  };
+
+  const filteredTopics = topics.filter(topic => 
+    topic.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    topic.author_name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   const formatDate = (dateStr: string) => {
     const d = new Date(dateStr);
     return d.toLocaleDateString(lang === "lv" ? "lv-LV" : "en-US", {
