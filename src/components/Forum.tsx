@@ -188,17 +188,6 @@ const EmailOtpForm = ({ context }: { context: "topic" | "reply" }) => {
 };
 
 
-  useEffect(() => {
-    if (!email.trim() || !cooldownUntil) return;
-    if (now >= cooldownUntil) {
-      clearCooldownUntil(email);
-      setCooldownUntil(null);
-      // do not force-clear error (user might have other errors)
-    }
-  }, [now, cooldownUntil, email]);
-
-  const remainingMs = cooldownUntil ? Math.max(0, cooldownUntil - now) : 0;
-  const inCooldown = !!cooldownUntil && remainingMs > 0;
 
   const formatRemaining = (ms: number) => {
     const totalSec = Math.ceil(ms / 1000);
