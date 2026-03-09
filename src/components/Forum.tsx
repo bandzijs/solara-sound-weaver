@@ -358,7 +358,7 @@ const Forum = () => {
     }
   };
 
-  const canDelete = (ownerId: string) => isAdmin || user?.id === ownerId;
+  const canDelete = (ownerId: string) => isAdmin;
 
   const handleLikeComment = async (commentId: string, currentlyLiked: boolean) => {
     if (!user) return;
