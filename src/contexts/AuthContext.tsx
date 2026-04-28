@@ -2,7 +2,11 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import type { User, Session } from "@supabase/supabase-js";
 
-const ADMIN_EMAIL = "silavarv@gmail.com";
+const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL;
+
+if (!ADMIN_EMAIL) {
+  throw new Error('Missing VITE_ADMIN_EMAIL in .env.local');
+}
 
 interface AuthContextType {
   user: User | null;
@@ -29,11 +33,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [profileChecked, setProfileChecked] = useState(false);
 
   const fetchNickname = async (userId: string) => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("profiles")
       .select("nickname")
       .eq("id", userId)
       .maybeSingle();
+    if (error) {
+      console.error("[AuthContext] Failed to fetch nickname:", error.message);
+    }
     setNicknameState(data?.nickname ?? null);
     setProfileChecked(true);
   };
