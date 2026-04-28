@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/lib/supabase";
+import { getErrorMessage } from "@/lib/utils";
+import { toast } from "sonner";
+import { getErrorMessage } from "@/lib/utils";
+import { toast } from "sonner";
 
 const SubmitForm = () => {
   const { t } = useLanguage();
@@ -12,21 +16,29 @@ const SubmitForm = () => {
     e.preventDefault();
     setSubmitting(true);
 
-    const { error } = await supabase
-      .from("submissions")
-      .insert([{
-        name: form.name.trim(),
-        email: form.email.trim(),
-        poem_text: form.text.trim(),
-        mood: form.mood,
-      }]);
+    try {
+      const { error } = await supabase
+        .from("submissions")
+        .insert([{
+          name: form.name.trim(),
+          email: form.email.trim(),
+          poem_text: form.text.trim(),
+          mood: form.mood,
+        }]);
 
-    setSubmitting(false);
+      if (error) {
+        toast.error(error.message || "Failed to submit your poem. Please try again.");
+        return;
+      }
 
-    if (!error) {
+      toast.success("Your words are on their way to becoming music. ✦");
       setSubmitted(true);
       setTimeout(() => setSubmitted(false), 5000);
       setForm({ name: "", email: "", text: "", mood: "" });
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err) || "An unexpected error occurred. Please try again.");
+    } finally {
+      setSubmitting(false);
     }
   };
 

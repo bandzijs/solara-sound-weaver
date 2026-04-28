@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAdmin } from "@/contexts/AdminContext";
 import { supabase } from "@/lib/supabase";
+import { getErrorMessage } from "@/lib/utils";
 import { Trash2 } from "lucide-react";
 
 interface Comment {
@@ -37,13 +38,20 @@ const CommunityWall = () => {
   };
 
   const handleDelete = async (id: string) => {
-    const { error } = await supabase
-      .from("comments")
-      .update({ is_deleted: true, deleted_at: new Date().toISOString() })
-      .eq("id", id);
+    try {
+      const { error } = await supabase
+        .from("comments")
+        .update({ is_deleted: true, deleted_at: new Date().toISOString() })
+        .eq("id", id);
 
-    if (!error) {
+      if (error) {
+        console.error("Failed to delete comment:", error.message);
+        return;
+      }
+
       setComments((prev) => prev.filter((c) => c.id !== id));
+    } catch (err: unknown) {
+      console.error("Error deleting comment:", getErrorMessage(err));
     }
   };
 
@@ -51,15 +59,24 @@ const CommunityWall = () => {
     e.preventDefault();
     if (!name.trim() || !message.trim()) return;
 
-    const { data, error } = await supabase
-      .from("comments")
-      .insert([{ name: name.trim(), message: message.trim() }])
-      .select("id, name, message")
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from("comments")
+        .insert([{ name: name.trim(), message: message.trim() }])
+        .select("id, name, message")
+        .single();
 
-    if (!error && data) {
-      setComments([data, ...comments]);
-      setMessage("");
+      if (error) {
+        console.error("Failed to post comment:", error.message);
+        return;
+      }
+
+      if (data) {
+        setComments([data, ...comments]);
+        setMessage("");
+      }
+    } catch (err: unknown) {
+      console.error("Error posting comment:", getErrorMessage(err));
     }
   };
 

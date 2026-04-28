@@ -5,6 +5,8 @@ import { styleKeys, type Song } from "@/data/songs";
 import { Search, ChevronLeft, ChevronRight } from "lucide-react";
 import StarRating from "@/components/StarRating";
 import { hasConsent } from "@/lib/cookieConsent";
+import { getErrorMessage } from "@/lib/utils";
+import { getErrorMessage } from "@/lib/utils";
 
 const SONGS_PER_PAGE = 9;
 
@@ -82,48 +84,66 @@ const MusicGallery = () => {
   }, []);
 
   const fetchSongs = async () => {
-    const { data } = await supabase
-      .from("songs")
-      .select("*")
-      .order("created_at", { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from("songs")
+        .select("*")
+        .order("created_at", { ascending: false });
 
-    if (data) {
-      setAllSongs((data as DbSong[]).map(mapDbSong));
+      if (error) {
+        console.error("Failed to load songs:", error.message);
+        return;
+      }
+
+      if (data) {
+        setAllSongs((data as DbSong[]).map(mapDbSong));
+      }
+    } catch (err: unknown) {
+      console.error("Error fetching songs:", getErrorMessage(err));
     }
   };
 
   const fetchRatings = useCallback(async (songIds: string[]) => {
     if (songIds.length === 0) return;
 
-    const { data } = await supabase
-      .from("song_ratings")
-      .select("song_id, rating, visitor_id")
-      .in("song_id", songIds);
+    try {
+      const { data, error } = await supabase
+        .from("song_ratings")
+        .select("song_id, rating, visitor_id")
+        .in("song_id", songIds);
 
-    if (data) {
-      const map: Record<string, RatingData> = {};
-      songIds.forEach((id) => {
-        map[id] = { average: 0, count: 0, userRating: null };
-      });
+      if (error) {
+        console.error("Failed to load ratings:", error.message);
+        return;
+      }
 
-      const totals: Record<string, { sum: number; count: number }> = {};
-      data.forEach((r) => {
-        if (!totals[r.song_id]) totals[r.song_id] = { sum: 0, count: 0 };
-        totals[r.song_id].sum += r.rating;
-        totals[r.song_id].count += 1;
-        if (visitorId.current && r.visitor_id === visitorId.current) {
-          if (map[r.song_id]) map[r.song_id].userRating = r.rating;
-        }
-      });
+      if (data) {
+        const map: Record<string, RatingData> = {};
+        songIds.forEach((id) => {
+          map[id] = { average: 0, count: 0, userRating: null };
+        });
 
-      Object.entries(totals).forEach(([songId, { sum, count }]) => {
-        if (map[songId]) {
-          map[songId].average = sum / count;
-          map[songId].count = count;
-        }
-      });
+        const totals: Record<string, { sum: number; count: number }> = {};
+        data.forEach((r) => {
+          if (!totals[r.song_id]) totals[r.song_id] = { sum: 0, count: 0 };
+          totals[r.song_id].sum += r.rating;
+          totals[r.song_id].count += 1;
+          if (visitorId.current && r.visitor_id === visitorId.current) {
+            if (map[r.song_id]) map[r.song_id].userRating = r.rating;
+          }
+        });
 
-      setRatings(map);
+        Object.entries(totals).forEach(([songId, { sum, count }]) => {
+          if (map[songId]) {
+            map[songId].average = sum / count;
+            map[songId].count = count;
+          }
+        });
+
+        setRatings(map);
+      }
+    } catch (err: unknown) {
+      console.error("Error fetching ratings:", getErrorMessage(err));
     }
   }, []);
 
@@ -169,10 +189,18 @@ const MusicGallery = () => {
       };
     });
 
-    await supabase.from("song_ratings").upsert(
-      { song_id: songDbId, visitor_id: vid, rating },
-      { onConflict: "song_id,visitor_id" }
-    );
+    try {
+      const { error } = await supabase.from("song_ratings").upsert(
+        { song_id: songDbId, visitor_id: vid, rating },
+        { onConflict: "song_id,visitor_id" }
+      );
+
+      if (error) {
+        console.error("Failed to save rating:", error.message);
+      }
+    } catch (err: unknown) {
+      console.error("Error saving rating:", getErrorMessage(err));
+    }
   };
 
   const filtered = useMemo(() => {

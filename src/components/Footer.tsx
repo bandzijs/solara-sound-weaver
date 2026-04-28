@@ -3,6 +3,8 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { Instagram, Youtube, Mail, Phone, Send } from "lucide-react";
 import { useAdmin } from "@/contexts/AdminContext";
 import { supabase } from "@/lib/supabase";
+import { getErrorMessage } from "@/lib/utils";
+import { getErrorMessage } from "@/lib/utils";
 
 interface SocialLink {
   platform: string;
@@ -19,13 +21,23 @@ const Footer = () => {
 
   useEffect(() => {
     const fetchLinks = async () => {
-      const { data } = await supabase
-        .from("social_links")
-        .select("platform, url");
-      if (data) {
-        const map: Record<string, string> = {};
-        data.forEach((l: SocialLink) => { map[l.platform] = l.url; });
-        setSocialLinks(map);
+      try {
+        const { data, error } = await supabase
+          .from("social_links")
+          .select("platform, url");
+
+        if (error) {
+          console.error("Failed to load social links:", error.message);
+          return;
+        }
+
+        if (data) {
+          const map: Record<string, string> = {};
+          data.forEach((l: SocialLink) => { map[l.platform] = l.url; });
+          setSocialLinks(map);
+        }
+      } catch (err: unknown) {
+        console.error("Error fetching social links:", getErrorMessage(err));
       }
     };
     fetchLinks();
