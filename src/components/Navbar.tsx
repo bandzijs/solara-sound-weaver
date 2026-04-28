@@ -43,7 +43,7 @@ const Navbar = () => {
           {user && (
             <div className="flex items-center gap-2">
               {avatarUrl ? (
-                <img src={avatarUrl} alt="" className="w-7 h-7 rounded-full" />
+                <img src={avatarUrl} alt={`${displayName}'s profile picture`} className="w-7 h-7 rounded-full" />
               ) : (
                 <div className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center text-xs font-heading text-primary">
                   {displayName?.[0]?.toUpperCase() || "?"}

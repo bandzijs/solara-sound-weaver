@@ -109,10 +109,8 @@ const AdminPanel = () => {
 
     let error;
     if (editingId) {
-      console.log("[AdminPanel] Updating song:", editingId, payload);
       ({ error } = await supabase.from("songs").update(payload).eq("id", editingId));
     } else {
-      console.log("[AdminPanel] Saving song:", payload);
       ({ error } = await supabase.from("songs").insert([payload]));
     }
 
@@ -129,13 +127,11 @@ const AdminPanel = () => {
   };
 
   const handleDeleteSong = async (id: string) => {
-    console.log("[AdminPanel] Deleting song:", id);
-    const { error, count } = await supabase.from("songs").delete().eq("id", id);
+    const { error } = await supabase.from("songs").delete().eq("id", id);
     if (error) {
       console.error("[AdminPanel] Delete error:", error);
-      alert(`Error deleting song: ${error.message}\n\nThis is likely an RLS policy issue. Add this policy in Supabase SQL Editor:\n\nCREATE POLICY "Anyone can delete songs" ON public.songs FOR DELETE USING (true);`);
+      alert("Failed to delete song. Please try again.");
     } else {
-      console.log("[AdminPanel] Song deleted successfully, count:", count);
       setSongs((prev) => prev.filter((s) => s.id !== id));
     }
   };
@@ -187,6 +183,7 @@ const AdminPanel = () => {
             <button
               onClick={() => navigate("/")}
               className="text-muted-foreground hover:text-primary transition-colors"
+              aria-label="Back to main site"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
@@ -341,10 +338,18 @@ const AdminPanel = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-1 ml-3">
-                    <button onClick={() => handleEditSong(song)} className="text-muted-foreground hover:text-primary transition-colors">
+                    <button 
+                      onClick={() => handleEditSong(song)} 
+                      className="text-muted-foreground hover:text-primary transition-colors"
+                      aria-label="Edit song"
+                    >
                       <Pencil className="w-4 h-4" />
                     </button>
-                    <button onClick={() => handleDeleteSong(song.id)} className="text-muted-foreground hover:text-destructive transition-colors">
+                    <button 
+                      onClick={() => handleDeleteSong(song.id)} 
+                      className="text-muted-foreground hover:text-destructive transition-colors"
+                      aria-label="Delete song"
+                    >
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>

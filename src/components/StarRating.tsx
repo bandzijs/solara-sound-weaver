@@ -24,6 +24,7 @@ const StarRating = ({ averageRating, totalVotes, userRating, onRate }: StarRatin
             onMouseEnter={() => setHovered(star)}
             onClick={() => onRate(star)}
             className="transition-transform duration-150 hover:scale-110 focus:outline-none"
+            aria-label={`Rate ${star} star${star !== 1 ? "s" : ""}`}
           >
             <Star
               className={`w-4 h-4 transition-colors duration-150 ${

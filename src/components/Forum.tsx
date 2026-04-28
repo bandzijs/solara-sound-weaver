@@ -50,15 +50,15 @@ const EmailOtpForm = ({ context }: { context: "topic" | "reply" }) => {
     const { error: otpError } = await signInWithOtp(trimmedEmail);
 
     if (otpError) {
-      const errAny = otpError as any;
-      const code = errAny?.code as string | undefined;
+      const errExt = otpError as { code?: string; status?: number };
+      const code = errExt.code;
       const msg = (otpError.message ?? "").toLowerCase();
 
       const isRateLimit =
         code === "over_email_send_rate_limit" ||
         otpError.message?.includes("429") ||
         msg.includes("rate") ||
-        errAny?.status === 429;
+        errExt.status === 429;
 
       // Important: do NOT auto-switch to code step when sending was blocked by rate limit.
       // If user already has a valid code, they can use the "Man jau ir kods" action.
@@ -89,12 +89,12 @@ const EmailOtpForm = ({ context }: { context: "topic" | "reply" }) => {
     const { error: verifyError } = await verifyOtp(trimmedEmail, otpCode.trim());
 
     if (verifyError) {
-      const errAny = verifyError as any;
-      const code = errAny?.code as string | undefined;
+      const errExt = verifyError as { code?: string; status?: number };
+      const code = errExt.code;
       const msg = (verifyError.message ?? "").toLowerCase();
 
       const isRateLimit =
-        verifyError.message?.includes("429") || msg.includes("rate") || errAny?.status === 429;
+        verifyError.message?.includes("429") || msg.includes("rate") || errExt.status === 429;
 
       const isExpiredOrInvalid =
         code === "otp_expired" || msg.includes("expired") || msg.includes("invalid");
@@ -490,7 +490,7 @@ const Forum = () => {
 
   const AvatarBubble = ({ url, name }: { url?: string | null; name: string }) => (
     url ? (
-      <img src={url} alt="" className="w-8 h-8 rounded-full shrink-0" />
+      <img src={url} alt={`${name}'s avatar`} className="w-8 h-8 rounded-full shrink-0" />
     ) : (
       <div className="w-8 h-8 rounded-full bg-secondary shrink-0 flex items-center justify-center text-xs font-heading text-primary">
         {name?.[0]?.toUpperCase() || "?"}

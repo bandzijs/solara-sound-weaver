@@ -17,14 +17,14 @@ const App = () => {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        console.log("Session found:", session.user.email);
+        // Session loaded silently
       }
     });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("Auth change:", event, session?.user?.email);
+      // Auth state updated silently
     });
 
     return () => subscription.unsubscribe();
