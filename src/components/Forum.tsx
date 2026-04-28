@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
@@ -277,7 +277,7 @@ const Forum = () => {
     return () => {
       supabase.removeChannel(commentsChannel);
     };
-  }, [selectedTopic]);
+  }, [selectedTopic, fetchComments]);
 
   async function fetchTopics() {
     setLoading(true);
@@ -306,7 +306,7 @@ const Forum = () => {
     setLoading(false);
   }
 
-  const fetchComments = async (topicId: string) => {
+  const fetchComments = useCallback(async (topicId: string) => {
     const { data } = await supabase
       .from("comments")
       .select("id, topic_id, message, author_name, user_id, created_at, avatar_url")
@@ -354,7 +354,7 @@ const Forum = () => {
 
     // Fallback if likes table doesn't exist or user not logged in
     setComments(data.map(c => ({ ...c, like_count: 0, user_has_liked: false })));
-  };
+  }, [user]);
 
   const openTopic = (topic: Topic) => {
     setSelectedTopic(topic);
