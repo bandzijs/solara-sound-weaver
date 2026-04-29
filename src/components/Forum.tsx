@@ -258,6 +258,54 @@ const Forum = () => {
     };
   }, []);
 
+  const fetchComments = useCallback(async (topicId: string) => {
+    const { data } = await supabase
+      .from("comments")
+      .select("id, topic_id, message, author_name, user_id, created_at, avatar_url")
+      .eq("topic_id", topicId)
+      .order("created_at", { ascending: true });
+
+    if (!data) {
+      setComments([]);
+      return;
+    }
+
+    try {
+      if (user) {
+        const commentIds = data.map(c => c.id);
+        const { data: likes, error } = await supabase
+          .from("comment_likes")
+          .select("comment_id, user_id")
+          .in("comment_id", commentIds);
+
+        if (!error && likes) {
+          const likeCounts: Record<string, number> = {};
+          const userLikes = new Set<string>();
+
+          likes.forEach(like => {
+            likeCounts[like.comment_id] = (likeCounts[like.comment_id] || 0) + 1;
+            if (like.user_id === user.id) {
+              userLikes.add(like.comment_id);
+            }
+          });
+
+          const commentsWithLikes = data.map(c => ({
+            ...c,
+            like_count: likeCounts[c.id] || 0,
+            user_has_liked: userLikes.has(c.id)
+          }));
+
+          setComments(commentsWithLikes);
+          return;
+        }
+      }
+    } catch (error) {
+      console.log("Like system not ready yet - table might not exist");
+    }
+
+    setComments(data.map(c => ({ ...c, like_count: 0, user_has_liked: false })));
+  }, [user]);
+
   // Real-time subscriptions for comments when viewing a topic
   useEffect(() => {
     if (!selectedTopic) return;
@@ -305,56 +353,6 @@ const Forum = () => {
     }
     setLoading(false);
   }
-
-  const fetchComments = useCallback(async (topicId: string) => {
-    const { data } = await supabase
-      .from("comments")
-      .select("id, topic_id, message, author_name, user_id, created_at, avatar_url")
-      .eq("topic_id", topicId)
-      .order("created_at", { ascending: true });
-
-    if (!data) {
-      setComments([]);
-      return;
-    }
-
-    // Try to fetch likes (table might not exist yet)
-    try {
-      if (user) {
-        const commentIds = data.map(c => c.id);
-        const { data: likes, error } = await supabase
-          .from("comment_likes")
-          .select("comment_id, user_id")
-          .in("comment_id", commentIds);
-
-        if (!error && likes) {
-          const likeCounts: Record<string, number> = {};
-          const userLikes = new Set<string>();
-
-          likes.forEach(like => {
-            likeCounts[like.comment_id] = (likeCounts[like.comment_id] || 0) + 1;
-            if (like.user_id === user.id) {
-              userLikes.add(like.comment_id);
-            }
-          });
-
-          const commentsWithLikes = data.map(c => ({
-            ...c,
-            like_count: likeCounts[c.id] || 0,
-            user_has_liked: userLikes.has(c.id)
-          }));
-
-          setComments(commentsWithLikes);
-          return;
-        }
-      }
-    } catch (error) {
-      console.log("Like system not ready yet - table might not exist");
-    }
-
-    // Fallback if likes table doesn't exist or user not logged in
-    setComments(data.map(c => ({ ...c, like_count: 0, user_has_liked: false })));
-  }, [user]);
 
   const openTopic = (topic: Topic) => {
     setSelectedTopic(topic);
