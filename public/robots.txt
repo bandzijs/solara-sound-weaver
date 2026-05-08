@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /admin
 
-Sitemap: https://www.solaraflames.com/sitemap.xml
+Sitemap: https://solaraflames.com/sitemap.xml
