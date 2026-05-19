@@ -74,7 +74,7 @@ export const translations = {
     },
     about: {
       heading: "About",
-      text: "Solara Music Vibes is a place where words become melody. Poetry. Emotion. Music. Together.",
+      text: "Solara Music Vibes is a project dedicated to helping artists, poets, and creative thinkers discover their potential by transforming it into musical expression. The project brings together music production and modern AI technology to make the creative process more accessible, efficient, and straightforward.\n\nThrough the power of artificial intelligence tools and our expertise in music production, we are able to help individuals and businesses create original musical compositions in a short amount of time. Solara Music Vibes offers the opportunity to develop ideas from a simple piece of text, a poem, or an emotion into a fully realized audio work.\n\nOur approach is designed to ease the process of production, songwriting, and lyric writing for those who have art in their hearts but lack the time, technical knowledge, or professional experience in their daily lives to bring their ideas to life with our help.\n\nSolara Music Vibes believes that creativity knows no boundaries, and that technology can become the bridge between an idea and its musical realization.",
     },
     howItWorks: {
       heading: "How it works",
