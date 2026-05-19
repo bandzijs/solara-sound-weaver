@@ -2,11 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import type { User, Session } from "@supabase/supabase-js";
 
-const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL;
-
-if (!ADMIN_EMAIL) {
-  throw new Error('Missing VITE_ADMIN_EMAIL in .env.local');
-}
+const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL ?? '';
 
 interface AuthContextType {
   user: User | null;

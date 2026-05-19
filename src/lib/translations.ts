@@ -13,7 +13,7 @@ export const translations = {
     },
     about: {
       heading: "Par projektu",
-      text: "Solara Music Vibes ir vieta, kur vārdi kļūst par melodiju. Dzeja. Emocijas. Mūzika. Kopā.",
+      text: "Solara Music Vibes ir projekts, kura mērķis ir palīdzēt māksliniekiem, dzejniekiem un citiem radoši domājošiem cilvēkiem atklāt, savu potenciālu pārvēršot to muzikālā izpildījumā. Projekts apvieno, mūzikas producēšanu un modernās AI tehnoloģijas, lai radīšanas procesu padarītu pieejamāku, ātrāku un vienkāršāku.\n\nPateicoties mākslīgā intelekta rīkiem un mūsu pieredzei mūzikas producēšanā, spējam īsā laikā palīdzēt radīt oriģinālus muzikālus skaņdarbus gan privātpersonām, gan uzņēmumiem. Solara Music Vibes piedāvā iespēju attīstīt idejas no vienkārša teksta, dzejas vai emocijas līdz pilnvērtīgam audio darbam.\n\nMūsu pieeja palīdz atvieglot producēšanas, dziedāšanas un tekstu rakstīšanas procesu cilvēkiem, kuriem māksla ir sirdī, bet ikdienā trūkst laika, tehnisko zināšanu vai profesionālas pieredzes, lai savas idejas realizētu pašu spēkiem\n\nSolara Music Vibes tic, ka radošumam nav robežu, un tehnoloģijas var kļūt par tiltu starp ideju un tās muzikālu realizāciju.",
     },
     howItWorks: {
       heading: "Kā tas notiek",

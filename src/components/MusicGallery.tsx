@@ -6,7 +6,6 @@ import { Search, ChevronLeft, ChevronRight } from "lucide-react";
 import StarRating from "@/components/StarRating";
 import { hasConsent } from "@/lib/cookieConsent";
 import { getErrorMessage } from "@/lib/utils";
-import { getErrorMessage } from "@/lib/utils";
 
 const SONGS_PER_PAGE = 9;
 

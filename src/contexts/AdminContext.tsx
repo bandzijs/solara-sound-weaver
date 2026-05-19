@@ -1,11 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 
-const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD;
+const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD ?? '';
 const STORAGE_KEY = "solara-admin";
-
-if (!ADMIN_PASSWORD) {
-  throw new Error('Missing VITE_ADMIN_PASSWORD in .env.local');
-}
 
 interface AdminContextType {
   isAdmin: boolean;
