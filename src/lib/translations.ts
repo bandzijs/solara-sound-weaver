@@ -3,7 +3,7 @@ export const translations = {
     nav: {
       listen: "Klausīties portfolio",
       about: "Par projektu",
-      submit: "Iesūtīt",
+      submit: "Sazinies ar mums",
       community: "Kopiena",
     },
     hero: {
@@ -64,7 +64,7 @@ export const translations = {
     nav: {
       listen: "Listen to portfolio",
       about: "About",
-      submit: "Submit",
+      submit: "Contact us",
       community: "Community",
     },
     hero: {
