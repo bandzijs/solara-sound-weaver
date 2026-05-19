@@ -1,14 +1,14 @@
 export const translations = {
   lv: {
     nav: {
-      listen: "Klausīties",
+      listen: "Klausīties portfolio",
       about: "Par projektu",
       submit: "Iesūtīt",
       community: "Kopiena",
     },
     hero: {
-      tagline: "Iedod man vārdus. Es tos pārvērtīšu mūzikā.",
-      listenBtn: "Klausīties",
+      tagline: "Mūzikas producēšanas pakalpojums, kas izmanto mākslīgo intelektu, lai paātrinātu radošo procesu veidojot individuālus skaņdarbus privātpersonām, zīmoliem un radošiem projektiem.",
+      listenBtn: "Klausīties portfolio",
       submitBtn: "Iesūtīt vārdus",
     },
     about: {
@@ -20,7 +20,7 @@ export const translations = {
       steps: ["Tu iedod vārdus", "Mēs radām kopā", "Dziesma top"],
     },
     music: {
-      heading: "Mūzika",
+      heading: "Portfolio",
       filterAll: "Visi",
       comments: "komentāri",
     },
@@ -62,14 +62,14 @@ export const translations = {
   },
   en: {
     nav: {
-      listen: "Listen",
+      listen: "Listen to portfolio",
       about: "About",
       submit: "Submit",
       community: "Community",
     },
     hero: {
-      tagline: "Give me your words. I will turn them into music.",
-      listenBtn: "Listen",
+      tagline: "Music production service that uses AI to accelerate the creative process delivering custom tracks for individuals, brands, and creative projects.",
+      listenBtn: "Listen to portfolio",
       submitBtn: "Send your words",
     },
     about: {
@@ -81,7 +81,7 @@ export const translations = {
       steps: ["You give the words", "We create together", "The song becomes yours"],
     },
     music: {
-      heading: "Music",
+      heading: "Portfolio",
       filterAll: "All",
       comments: "comments",
     },
