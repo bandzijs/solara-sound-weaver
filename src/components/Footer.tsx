@@ -116,11 +116,11 @@ const Footer = () => {
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6 text-sm font-body">
           <a
-            href="mailto:info@solaraflames.com"
+            href="mailto:solarainfo@zohomail.eu"
             className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300"
           >
             <Mail className="w-4 h-4 text-primary/70" />
-            info@solaraflames.com
+            solarainfo@zohomail.eu
           </a>
           <a
             href="tel:+37126769475"
