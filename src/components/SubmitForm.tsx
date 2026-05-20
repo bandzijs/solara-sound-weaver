@@ -3,8 +3,6 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/lib/supabase";
 import { getErrorMessage } from "@/lib/utils";
 import { toast } from "sonner";
-import { getErrorMessage } from "@/lib/utils";
-import { toast } from "sonner";
 
 const SubmitForm = () => {
   const { t } = useLanguage();
@@ -30,6 +28,17 @@ const SubmitForm = () => {
         toast.error(error.message || "Failed to submit your poem. Please try again.");
         return;
       }
+
+      fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name.trim(),
+          email: form.email.trim(),
+          text: form.text.trim(),
+          mood: form.mood,
+        }),
+      }).catch((err) => console.error("Email notification failed:", err));
 
       toast.success("Your words are on their way to becoming music. ✦");
       setSubmitted(true);
