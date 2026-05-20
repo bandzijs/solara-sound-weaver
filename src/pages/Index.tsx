@@ -1,4 +1,5 @@
 import { LanguageProvider } from "@/contexts/LanguageContext";
+import SEO from "@/components/SEO";
 import StarField from "@/components/StarField";
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
@@ -14,6 +15,7 @@ import BannerSection from "@/components/BannerSection";
 const Index = () => {
   return (
     <LanguageProvider>
+      <SEO />
       <div className="relative min-h-screen overflow-x-hidden">
         <StarField />
         <Navbar />
