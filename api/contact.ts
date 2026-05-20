@@ -37,6 +37,26 @@ export default async function handler(req: any, res: any) {
       `,
     });
 
+    if (process.env.DISCORD_WEBHOOK_URL) {
+      await fetch(process.env.DISCORD_WEBHOOK_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          embeds: [{
+            title: `New submission from ${name}`,
+            color: 0x7c3aed,
+            fields: [
+              { name: "Name", value: name, inline: true },
+              { name: "Email", value: email, inline: true },
+              { name: "Mood", value: mood || "—", inline: true },
+              ...(text ? [{ name: "Text", value: text }] : []),
+            ],
+            timestamp: new Date().toISOString(),
+          }],
+        }),
+      });
+    }
+
     return res.status(200).json({ success: true });
   } catch (error) {
     console.error("Resend error:", error);
