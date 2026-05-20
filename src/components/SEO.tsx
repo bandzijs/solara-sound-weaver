@@ -62,8 +62,8 @@ const SEO_DATA = {
 } as const;
 
 const SEO = () => {
-  const { language } = useLanguage();
-  const seo = SEO_DATA[language];
+  const { lang } = useLanguage();
+  const seo = SEO_DATA[lang] ?? SEO_DATA.lv;
 
   return (
     <Helmet>
