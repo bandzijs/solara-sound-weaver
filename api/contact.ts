@@ -15,7 +15,7 @@ export default async function handler(req: any, res: any) {
 
   try {
     await resend.emails.send({
-      from: "Solara <onboarding@resend.dev>",
+      from: "Solara <noreply@solaraflames.com>",
       to: process.env.OWNER_EMAIL!,
       subject: `New submission from ${name}`,
       html: `
@@ -27,7 +27,7 @@ export default async function handler(req: any, res: any) {
     });
 
     await resend.emails.send({
-      from: "Solara <onboarding@resend.dev>",
+      from: "Solara <noreply@solaraflames.com>",
       to: email,
       subject: "We received your message",
       html: `
