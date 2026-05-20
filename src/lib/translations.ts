@@ -17,7 +17,7 @@ export const translations = {
     },
     howItWorks: {
       heading: "Kā tas notiek",
-      steps: ["Tu iedod vārdus", "Mēs radām kopā", "Dziesma top"],
+      steps: ["Tu raksti ideju", "Mēs veidojam skaņu", "Klausies rezultātu"],
     },
     music: {
       heading: "Portfolio",
