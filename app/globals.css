@@ -1,0 +1,116 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Brand colour tokens ── */
+:root {
+  --navy:  #0a0a1a;
+  --navy2: #0f0f2e;
+  --navy3: #141432;
+  --k1:    #2C5EAD;
+  --k2:    #1591DC;
+  --k3:    #4BB8FA;
+  --k4:    #C4E2F5;
+
+  /* shadcn/radix tokens mapped to the dark brand palette */
+  --background:   220 47% 7%;
+  --foreground:   210 40% 96%;
+  --card:         230 45% 10%;
+  --card-foreground: 210 40% 96%;
+  --popover:      230 45% 10%;
+  --popover-foreground: 210 40% 96%;
+  --primary:      207 74% 47%;   /* k2 */
+  --primary-foreground: 210 40% 96%;
+  --secondary:    230 40% 18%;
+  --secondary-foreground: 210 40% 96%;
+  --muted:        230 30% 15%;
+  --muted-foreground: 215 20% 60%;
+  --accent:       207 74% 47%;
+  --accent-foreground: 210 40% 96%;
+  --destructive:  0 62% 50%;
+  --destructive-foreground: 210 40% 96%;
+  --border:       230 30% 20%;
+  --input:        230 30% 18%;
+  --ring:         207 74% 47%;
+  --radius:       0.5rem;
+}
+
+/* ── Base resets ── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--navy);
+  color: #e8eaf6;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Typography helpers ── */
+.font-syne {
+  font-family: var(--font-syne), sans-serif;
+}
+
+/* ── Gradient text utility ── */
+.text-gradient {
+  background: linear-gradient(135deg, var(--k2) 0%, var(--k3) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Glow utilities ── */
+.glow-k2 {
+  box-shadow: 0 0 24px rgba(21, 145, 220, 0.35);
+}
+
+.glow-k3 {
+  box-shadow: 0 0 24px rgba(75, 184, 250, 0.3);
+}
+
+.text-glow {
+  text-shadow: 0 0 20px rgba(75, 184, 250, 0.4);
+}
+
+/* ── Alpine.js cloak — prevent FOUC ── */
+[x-cloak] {
+  display: none !important;
+}
+
+/* ── FAQ accordion transition ── */
+.faq-body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s ease;
+}
+
+.faq-body.open {
+  grid-template-rows: 1fr;
+}
+
+.faq-body > div {
+  overflow: hidden;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--navy2);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--k1);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--k2);
+}
