@@ -47,7 +47,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${syne.variable} ${dmSans.variable}`}>
       <head />
-      <body className="bg-navy text-white font-dm antialiased">
+      <body className="bg-navy text-white font-dm antialiased" x-data="{}">
         {children}
 
         {/* Alpine lang store — must register before Alpine CDN loads */}
