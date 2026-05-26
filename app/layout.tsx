@@ -50,6 +50,16 @@ export default function RootLayout({
       <body className="bg-navy text-white font-dm antialiased">
         {children}
 
+        {/* Alpine lang store — must register before Alpine CDN loads */}
+        <script dangerouslySetInnerHTML={{ __html: `
+          document.addEventListener('alpine:init', function() {
+            Alpine.store('lang', {
+              current: (typeof localStorage !== 'undefined' ? localStorage.getItem('sf_lang') : null) || 'lv',
+              set: function(l) { this.current = l; localStorage.setItem('sf_lang', l); }
+            })
+          })
+        ` }} />
+
         {/* Alpine.js v3.14.1 — afterInteractive so React hydrates before Alpine touches the DOM */}
         <Script
           src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"

@@ -20,19 +20,30 @@ export default function SongShowcase({ songs }: SongShowcaseProps) {
         {/* Header */}
         <div className="text-center mb-14">
           <p className="text-k3 text-xs font-semibold tracking-[0.2em] uppercase mb-3">
-            Real songs, real stories
+            <span x-show="$store.lang.current === 'en'" x-cloak="">Real songs, real stories</span>
+            <span x-show="$store.lang.current === 'lv'" x-cloak="">Īstas dziesmas, īsti stāsti</span>
           </p>
           <h2 className="font-syne font-bold text-white text-3xl sm:text-4xl mb-4">
-            Hear what we&apos;ve made
+            <span x-show="$store.lang.current === 'en'" x-cloak="">Hear what we&apos;ve made</span>
+            <span x-show="$store.lang.current === 'lv'" x-cloak="">Klausies, ko esam radījuši</span>
           </h2>
           <p className="text-white/45 text-base max-w-xl mx-auto">
-            Every song below was created from someone&apos;s words — a birthday message,
-            a wedding vow, a memory. Click any card to listen on YouTube.
+            <span x-show="$store.lang.current === 'en'" x-cloak="">
+              Every song below was created from someone&apos;s words — a birthday message,
+              a wedding vow, a memory. Click any card to listen on YouTube.
+            </span>
+            <span x-show="$store.lang.current === 'lv'" x-cloak="">
+              Katra zemāk esošā dziesma ir radīta no kāda vārdiem — dzimšanas dienas vēstījuma,
+              kāzu solījuma, atmiņas. Noklikšķini uz jebkuras kartes, lai klausītos YouTube.
+            </span>
           </p>
         </div>
 
         {songs.length === 0 ? (
-          <p className="text-center text-white/30 py-16">No songs yet — check back soon.</p>
+          <p className="text-center text-white/30 py-16">
+            <span x-show="$store.lang.current === 'en'" x-cloak="">No songs yet — check back soon.</span>
+            <span x-show="$store.lang.current === 'lv'" x-cloak="">Dziesmu vēl nav — atnāc drīzumā.</span>
+          </p>
         ) : (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -85,7 +96,8 @@ export default function SongShowcase({ songs }: SongShowcaseProps) {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 text-k3 hover:text-white text-sm font-medium border border-k3/30 hover:border-k3/60 px-6 py-2.5 rounded-full transition-all duration-200"
               >
-                Browse all songs →
+                <span x-show="$store.lang.current === 'en'" x-cloak="">Browse all songs →</span>
+                <span x-show="$store.lang.current === 'lv'" x-cloak="">Skatīt visas dziesmas →</span>
               </a>
             </div>
           </>

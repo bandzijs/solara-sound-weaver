@@ -1,4 +1,4 @@
-const moods = [
+const moodsEn = [
   'Birthday',
   'Wedding',
   'Sorority',
@@ -6,6 +6,16 @@ const moods = [
   'Brand jingle',
   'Memorial',
   'Just because',
+]
+
+const moodsLv = [
+  'Dzimšanas diena',
+  'Kāzas',
+  'Korporācija',
+  'Jubileja',
+  'Zīmola dziesma',
+  'Piemiņa',
+  'Vienkārši tā',
 ]
 
 const formData = `{
@@ -20,7 +30,9 @@ const formData = `{
   async submit(e) {
     e.preventDefault()
     if (!this.mood || !this.name.trim() || !this.email.trim() || !this.poem_text.trim()) {
-      this.error = 'Please fill in all fields and select a mood.'
+      this.error = $store.lang.current === 'lv'
+        ? 'Lūdzu aizpildi visus laukus un izvēlies noskaņu.'
+        : 'Please fill in all fields and select a mood.'
       return
     }
     this.loading = true
@@ -38,13 +50,17 @@ const formData = `{
       })
       const data = await res.json()
       if (!res.ok) {
-        this.error = data.error || 'Something went wrong. Please try again.'
+        this.error = data.error || ($store.lang.current === 'lv'
+          ? 'Kaut kas nogāja greizi. Lūdzu mēģini vēlreiz.'
+          : 'Something went wrong. Please try again.')
       } else {
         this.success = true
         this.deliveryDate = data.deliveryDate
       }
     } catch {
-      this.error = 'Network error. Please check your connection and try again.'
+      this.error = $store.lang.current === 'lv'
+        ? 'Tīkla kļūda. Lūdzu pārbaudi savienojumu un mēģini vēlreiz.'
+        : 'Network error. Please check your connection and try again.'
     } finally {
       this.loading = false
     }
@@ -59,13 +75,16 @@ export default function OrderForm() {
         {/* Header */}
         <div className="text-center mb-12">
           <p className="text-k3 text-xs font-semibold tracking-[0.2em] uppercase mb-3">
-            Start here
+            <span x-show="$store.lang.current === 'en'" x-cloak="">Start here</span>
+            <span x-show="$store.lang.current === 'lv'" x-cloak="">Sāc šeit</span>
           </p>
           <h2 className="font-syne font-bold text-white text-3xl sm:text-4xl mb-4">
-            Order your song
+            <span x-show="$store.lang.current === 'en'" x-cloak="">Order your song</span>
+            <span x-show="$store.lang.current === 'lv'" x-cloak="">Pasūtīt dziesmu</span>
           </h2>
           <p className="text-white/45 text-base">
-            Write your words below. We handle the rest — music, vocals, production.
+            <span x-show="$store.lang.current === 'en'" x-cloak="">Write your words below. We handle the rest — music, vocals, production.</span>
+            <span x-show="$store.lang.current === 'lv'" x-cloak="">Uzraksti savus vārdus zemāk. Mēs parūpēsimies par pārējo — mūziku, vokālu, produkciju.</span>
           </p>
         </div>
 
@@ -83,17 +102,21 @@ export default function OrderForm() {
               </svg>
             </div>
             <h3 className="font-syne font-bold text-white text-2xl mb-3">
-              You&apos;re all set! 🎵
+              <span x-show="$store.lang.current === 'en'" x-cloak="">You&apos;re all set! 🎵</span>
+              <span x-show="$store.lang.current === 'lv'" x-cloak="">Viss kārtībā! 🎵</span>
             </h3>
             <p className="text-white/60 text-base mb-2">
-              Your order is confirmed. Check your inbox for a confirmation email.
+              <span x-show="$store.lang.current === 'en'" x-cloak="">Your order is confirmed. Check your inbox for a confirmation email.</span>
+              <span x-show="$store.lang.current === 'lv'" x-cloak="">Tavs pasūtījums ir apstiprināts. Pārbaudi savu e-pastu apstiprinājuma vēstulei.</span>
             </p>
             <p className="text-k4 text-sm">
-              Estimated delivery:{' '}
+              <span x-show="$store.lang.current === 'en'" x-cloak="">Estimated delivery: </span>
+              <span x-show="$store.lang.current === 'lv'" x-cloak="">Paredzamā piegāde: </span>
               <strong className="text-k3" x-text="deliveryDate" />
             </p>
             <p className="text-white/35 text-xs mt-4">
-              A payment link will arrive shortly at your email address.
+              <span x-show="$store.lang.current === 'en'" x-cloak="">A payment link will arrive shortly at your email address.</span>
+              <span x-show="$store.lang.current === 'lv'" x-cloak="">Maksājuma saite drīzumā tiks nosūtīta uz tavu e-pasta adresi.</span>
             </p>
           </div>
 
@@ -107,10 +130,40 @@ export default function OrderForm() {
             {/* Mood chips */}
             <div>
               <label className="block text-white/60 text-xs font-semibold tracking-wider uppercase mb-3">
-                Occasion / Mood
+                <span x-show="$store.lang.current === 'en'" x-cloak="">Occasion / Mood</span>
+                <span x-show="$store.lang.current === 'lv'" x-cloak="">Notikums / Noskaņa</span>
               </label>
-              <div className="flex flex-wrap gap-2">
-                {moods.map((m) => (
+
+              {/* EN moods */}
+              <div
+                className="flex flex-wrap gap-2"
+                x-show="$store.lang.current === 'en'"
+                x-cloak=""
+              >
+                {moodsEn.map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    className="px-4 py-2 rounded-full border text-sm font-medium transition-all duration-150"
+                    {...{
+                      'x-on:click': `mood = mood === '${m}' ? '' : '${m}'`,
+                      'x-bind:class': `mood === '${m}'
+                        ? 'border-k3 bg-k3/15 text-k3'
+                        : 'border-k1/25 bg-transparent text-white/50 hover:border-k1/50 hover:text-white/80'`,
+                    }}
+                  >
+                    {m}
+                  </button>
+                ))}
+              </div>
+
+              {/* LV moods */}
+              <div
+                className="flex flex-wrap gap-2"
+                x-show="$store.lang.current === 'lv'"
+                x-cloak=""
+              >
+                {moodsLv.map((m) => (
                   <button
                     key={m}
                     type="button"
@@ -131,7 +184,8 @@ export default function OrderForm() {
             {/* Name */}
             <div>
               <label className="block text-white/60 text-xs font-semibold tracking-wider uppercase mb-2">
-                Your name
+                <span x-show="$store.lang.current === 'en'" x-cloak="">Your name</span>
+                <span x-show="$store.lang.current === 'lv'" x-cloak="">Tavs vārds</span>
               </label>
               <input
                 type="text"
@@ -145,7 +199,8 @@ export default function OrderForm() {
             {/* Email */}
             <div>
               <label className="block text-white/60 text-xs font-semibold tracking-wider uppercase mb-2">
-                Email address
+                <span x-show="$store.lang.current === 'en'" x-cloak="">Email address</span>
+                <span x-show="$store.lang.current === 'lv'" x-cloak="">E-pasta adrese</span>
               </label>
               <input
                 type="email"
@@ -159,7 +214,8 @@ export default function OrderForm() {
             {/* Poem / words */}
             <div>
               <label className="block text-white/60 text-xs font-semibold tracking-wider uppercase mb-2">
-                Your words, poem or story
+                <span x-show="$store.lang.current === 'en'" x-cloak="">Your words, poem or story</span>
+                <span x-show="$store.lang.current === 'lv'" x-cloak="">Tavi vārdi, dzejolis vai stāsts</span>
               </label>
               <textarea
                 rows={6}
@@ -182,7 +238,7 @@ export default function OrderForm() {
             <button
               type="submit"
               className="w-full bg-k2 hover:bg-k1 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold py-4 rounded-xl text-base transition-all duration-200 glow-k2 flex items-center justify-center gap-2"
-              {...{ 'x-bind:disabled': 'loading' }}
+              {...{'x-bind:disabled': 'loading'}}
             >
               {/* Spinner */}
               <svg
@@ -195,11 +251,16 @@ export default function OrderForm() {
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
               </svg>
-              <span x-text="loading ? 'Sending your order…' : 'Send my words →'" />
+              <span x-text={`loading
+                ? ($store.lang.current === 'lv' ? 'Sūta pasūtījumu…' : 'Sending your order…')
+                : ($store.lang.current === 'lv' ? 'Sūtīt vārdus →' : 'Send my words →')`}>
+                Send my words →
+              </span>
             </button>
 
             <p className="text-center text-white/25 text-xs">
-              No payment needed now — we&apos;ll send a secure payment link after reviewing your brief.
+              <span x-show="$store.lang.current === 'en'" x-cloak="">No payment needed now — we&apos;ll send a secure payment link after reviewing your brief.</span>
+              <span x-show="$store.lang.current === 'lv'" x-cloak="">Maksājums nav nepieciešams tagad — mēs nosūtīsim drošu maksājuma saiti pēc tava pieprasījuma izskatīšanas.</span>
             </p>
           </form>
         </div>

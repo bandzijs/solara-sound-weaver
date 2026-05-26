@@ -49,10 +49,12 @@ export default function Testimonials() {
         {/* Header */}
         <div className="text-center mb-14">
           <p className="text-k3 text-xs font-semibold tracking-[0.2em] uppercase mb-3">
-            What people say
+            <span x-show="$store.lang.current === 'en'" x-cloak="">What people say</span>
+            <span x-show="$store.lang.current === 'lv'" x-cloak="">Ko saka cilvēki</span>
           </p>
           <h2 className="font-syne font-bold text-white text-3xl sm:text-4xl">
-            Real stories, real songs
+            <span x-show="$store.lang.current === 'en'" x-cloak="">Real stories, real songs</span>
+            <span x-show="$store.lang.current === 'lv'" x-cloak="">Īsti stāsti, īstas dziesmas</span>
           </h2>
         </div>
 

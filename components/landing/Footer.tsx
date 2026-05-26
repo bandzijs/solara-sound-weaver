@@ -1,8 +1,15 @@
-const deliveryDate = new Date(Date.now() + 2 * 86400000).toLocaleDateString('en-US', {
-  weekday: 'short',
-  month: 'short',
-  day: 'numeric',
+const deliveryDateEn = new Date(Date.now() + 2 * 86400000).toLocaleDateString('en-US', {
+  weekday: 'short', month: 'short', day: 'numeric',
 })
+const deliveryDateLv = new Date(Date.now() + 2 * 86400000).toLocaleDateString('lv-LV', {
+  weekday: 'short', month: 'short', day: 'numeric',
+})
+
+const servicesEn = ['Personal — $49', 'Premium — $99', 'Business — $249+', 'Gift cards']
+const servicesLv = ['Personal — $49', 'Premium — $99', 'Business — $249+', 'Dāvanu kartes']
+
+const legalEn = ['Privacy policy', 'Terms of service', 'Refund policy', 'License terms']
+const legalLv = ['Privātuma politika', 'Pakalpojumu noteikumi', 'Atmaksas politika', 'Licences noteikumi']
 
 export default function Footer() {
   return (
@@ -13,22 +20,31 @@ export default function Footer() {
           <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
             <div>
               <h2 className="font-syne font-bold text-white text-2xl sm:text-3xl mb-2">
-                Ready to order your song?
+                <span x-show="$store.lang.current === 'en'" x-cloak="">Ready to order your song?</span>
+                <span x-show="$store.lang.current === 'lv'" x-cloak="">Gatavs pasūtīt dziesmu?</span>
               </h2>
               <p className="text-white/70 text-base">
-                Write your words today. Delivered in 48 hours.
+                <span x-show="$store.lang.current === 'en'" x-cloak="">Write your words today. Delivered in 48 hours.</span>
+                <span x-show="$store.lang.current === 'lv'" x-cloak="">Uzraksti savus vārdus šodien. Piegādāts 48 stundās.</span>
               </p>
             </div>
             <div className="flex flex-col sm:flex-row items-center gap-4 shrink-0">
               <span className="text-white/60 text-sm whitespace-nowrap">
-                Order now · Ready by{' '}
-                <strong className="text-white">{deliveryDate}</strong>
+                <span x-show="$store.lang.current === 'en'" x-cloak="">
+                  Order now · Ready by{' '}
+                  <strong className="text-white">{deliveryDateEn}</strong>
+                </span>
+                <span x-show="$store.lang.current === 'lv'" x-cloak="">
+                  Pasūtīt · Gatavs{' '}
+                  <strong className="text-white">{deliveryDateLv}</strong>
+                </span>
               </span>
               <a
                 href="#order"
                 className="whitespace-nowrap bg-white text-k1 font-bold px-7 py-3.5 rounded-xl text-sm hover:bg-k4 transition-colors duration-200"
               >
-                Order a song — from $49 →
+                <span x-show="$store.lang.current === 'en'" x-cloak="">Order a song — from $49 →</span>
+                <span x-show="$store.lang.current === 'lv'" x-cloak="">Pasūtīt dziesmu — no $49 →</span>
               </a>
             </div>
           </div>
@@ -59,7 +75,8 @@ export default function Footer() {
                 </span>
               </div>
               <p className="text-white/35 text-sm leading-relaxed mb-5 max-w-[220px]">
-                Your words. A real song. In 48 hours.
+                <span x-show="$store.lang.current === 'en'" x-cloak="">Your words. A real song. In 48 hours.</span>
+                <span x-show="$store.lang.current === 'lv'" x-cloak="">Tavi vārdi. Īsta dziesma. 48 stundās.</span>
               </p>
               {/* Social icons */}
               <div className="flex items-center gap-3">
@@ -110,19 +127,22 @@ export default function Footer() {
             {/* Services */}
             <div>
               <h4 className="font-syne font-semibold text-white text-sm mb-4 tracking-wide">
-                Services
+                <span x-show="$store.lang.current === 'en'" x-cloak="">Services</span>
+                <span x-show="$store.lang.current === 'lv'" x-cloak="">Pakalpojumi</span>
               </h4>
-              <ul className="space-y-2.5">
-                {[
-                  'Personal — $49',
-                  'Premium — $99',
-                  'Business — $249+',
-                  'Gift cards',
-                ].map((item) => (
+              {/* EN */}
+              <ul className="space-y-2.5" x-show="$store.lang.current === 'en'" x-cloak="">
+                {servicesEn.map((item) => (
                   <li key={item}>
-                    <a href="#order" className="text-white/35 hover:text-white/70 text-sm transition-colors">
-                      {item}
-                    </a>
+                    <a href="#order" className="text-white/35 hover:text-white/70 text-sm transition-colors">{item}</a>
+                  </li>
+                ))}
+              </ul>
+              {/* LV */}
+              <ul className="space-y-2.5" x-show="$store.lang.current === 'lv'" x-cloak="">
+                {servicesLv.map((item) => (
+                  <li key={item}>
+                    <a href="#order" className="text-white/35 hover:text-white/70 text-sm transition-colors">{item}</a>
                   </li>
                 ))}
               </ul>
@@ -131,19 +151,22 @@ export default function Footer() {
             {/* Legal */}
             <div>
               <h4 className="font-syne font-semibold text-white text-sm mb-4 tracking-wide">
-                Legal
+                <span x-show="$store.lang.current === 'en'" x-cloak="">Legal</span>
+                <span x-show="$store.lang.current === 'lv'" x-cloak="">Juridiskā info</span>
               </h4>
-              <ul className="space-y-2.5">
-                {[
-                  'Privacy policy',
-                  'Terms of service',
-                  'Refund policy',
-                  'License terms',
-                ].map((item) => (
+              {/* EN */}
+              <ul className="space-y-2.5" x-show="$store.lang.current === 'en'" x-cloak="">
+                {legalEn.map((item) => (
                   <li key={item}>
-                    <a href="#" className="text-white/35 hover:text-white/70 text-sm transition-colors">
-                      {item}
-                    </a>
+                    <a href="#" className="text-white/35 hover:text-white/70 text-sm transition-colors">{item}</a>
+                  </li>
+                ))}
+              </ul>
+              {/* LV */}
+              <ul className="space-y-2.5" x-show="$store.lang.current === 'lv'" x-cloak="">
+                {legalLv.map((item) => (
+                  <li key={item}>
+                    <a href="#" className="text-white/35 hover:text-white/70 text-sm transition-colors">{item}</a>
                   </li>
                 ))}
               </ul>
@@ -152,32 +175,18 @@ export default function Footer() {
             {/* Contact */}
             <div>
               <h4 className="font-syne font-semibold text-white text-sm mb-4 tracking-wide">
-                Contact
+                <span x-show="$store.lang.current === 'en'" x-cloak="">Contact</span>
+                <span x-show="$store.lang.current === 'lv'" x-cloak="">Kontakti</span>
               </h4>
               <ul className="space-y-2.5">
                 <li>
-                  <a
-                    href="mailto:hello@solaraflames.com"
-                    className="text-white/35 hover:text-white/70 text-sm transition-colors"
-                  >
+                  <a href="mailto:hello@solaraflames.com" className="text-white/35 hover:text-white/70 text-sm transition-colors">
                     hello@solaraflames.com
                   </a>
                 </li>
-                <li>
-                  <a href="#" className="text-white/35 hover:text-white/70 text-sm transition-colors">
-                    WhatsApp
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-white/35 hover:text-white/70 text-sm transition-colors">
-                    Instagram
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-white/35 hover:text-white/70 text-sm transition-colors">
-                    TikTok
-                  </a>
-                </li>
+                <li><a href="#" className="text-white/35 hover:text-white/70 text-sm transition-colors">WhatsApp</a></li>
+                <li><a href="#" className="text-white/35 hover:text-white/70 text-sm transition-colors">Instagram</a></li>
+                <li><a href="#" className="text-white/35 hover:text-white/70 text-sm transition-colors">TikTok</a></li>
               </ul>
             </div>
           </div>
@@ -185,10 +194,12 @@ export default function Footer() {
           {/* Bottom bar */}
           <div className="border-t border-white/5 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
             <p className="text-white/20 text-xs">
-              © 2025 Solara Flames. All rights reserved.
+              <span x-show="$store.lang.current === 'en'" x-cloak="">© 2025 Solara Flames. All rights reserved.</span>
+              <span x-show="$store.lang.current === 'lv'" x-cloak="">© 2025 Solara Flames. Visas tiesības aizsargātas.</span>
             </p>
             <p className="text-white/15 text-xs">
-              Custom songs · 48-hour delivery · Worldwide
+              <span x-show="$store.lang.current === 'en'" x-cloak="">Custom songs · 48-hour delivery · Worldwide</span>
+              <span x-show="$store.lang.current === 'lv'" x-cloak="">Individuālas dziesmas · 48h piegāde · Visā pasaulē</span>
             </p>
           </div>
         </div>

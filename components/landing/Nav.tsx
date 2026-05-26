@@ -1,3 +1,19 @@
+const NAV_EN: [string, string][] = [
+  ['How it works', '#how-it-works'],
+  ['Listen',       '#showcase'],
+  ['Pricing',      '#pricing'],
+  ['FAQ',          '#faq'],
+  ['For business', '#order'],
+]
+
+const NAV_LV: [string, string][] = [
+  ['Kā tas darbojas', '#how-it-works'],
+  ['Klausīties',      '#showcase'],
+  ['Cenas',           '#pricing'],
+  ['BUJ',             '#faq'],
+  ['Uzņēmumiem',      '#order'],
+]
+
 export default function Nav() {
   return (
     <nav
@@ -23,15 +39,30 @@ export default function Nav() {
             </span>
           </a>
 
-          {/* Desktop links */}
-          <div className="hidden md:flex items-center gap-7">
-            {([
-              ['How it works', '#how-it-works'],
-              ['Listen',       '#showcase'],
-              ['Pricing',      '#pricing'],
-              ['FAQ',          '#faq'],
-              ['For business', '#order'],
-            ] as [string, string][]).map(([label, href]) => (
+          {/* Desktop links — EN */}
+          <div
+            className="hidden md:flex items-center gap-7"
+            x-show="$store.lang.current === 'en'"
+            x-cloak=""
+          >
+            {NAV_EN.map(([label, href]) => (
+              <a
+                key={href}
+                href={href}
+                className="text-sm text-white/55 hover:text-white transition-colors duration-200"
+              >
+                {label}
+              </a>
+            ))}
+          </div>
+
+          {/* Desktop links — LV */}
+          <div
+            className="hidden md:flex items-center gap-7"
+            x-show="$store.lang.current === 'lv'"
+            x-cloak=""
+          >
+            {NAV_LV.map(([label, href]) => (
               <a
                 key={href}
                 href={href}
@@ -44,17 +75,27 @@ export default function Nav() {
 
           {/* Desktop right side */}
           <div className="hidden md:flex items-center gap-4">
-            {/* Language pill — visual only */}
+            {/* Language pill — functional */}
             <div className="flex items-center bg-white/5 border border-white/10 rounded-full p-0.5 text-xs font-medium select-none">
-              <span className="px-3 py-1 rounded-full bg-k2 text-white cursor-pointer">EN</span>
-              <span className="px-3 py-1 text-white/40 hover:text-white/60 cursor-pointer transition-colors">LV</span>
-              <span className="px-3 py-1 text-white/40 hover:text-white/60 cursor-pointer transition-colors">RU</span>
+              <span
+                className="px-3 py-1 rounded-full cursor-pointer transition-colors"
+                {...{'x-bind:class': "$store.lang.current === 'en' ? 'bg-k2 text-white' : 'text-white/40 hover:text-white/60'"}}
+                {...{'x-on:click': "$store.lang.set('en')"}}
+              >EN</span>
+              <span
+                className="px-3 py-1 rounded-full cursor-pointer transition-colors"
+                {...{'x-bind:class': "$store.lang.current === 'lv' ? 'bg-k2 text-white' : 'text-white/40 hover:text-white/60'"}}
+                {...{'x-on:click': "$store.lang.set('lv')"}}
+              >LV</span>
             </div>
+
+            {/* CTA */}
             <a
               href="#order"
               className="bg-k2 hover:bg-k1 text-white text-sm font-semibold px-5 py-2 rounded-lg transition-colors duration-200"
             >
-              Order a song
+              <span x-show="$store.lang.current === 'en'" x-cloak="">Order a song</span>
+              <span x-show="$store.lang.current === 'lv'" x-cloak="">Pasūtīt dziesmu</span>
             </a>
           </div>
 
@@ -78,34 +119,56 @@ export default function Nav() {
         x-cloak=""
       >
         <div className="flex flex-col pt-3 gap-0.5">
-          {([
-            ['How it works', '#how-it-works'],
-            ['Listen',       '#showcase'],
-            ['Pricing',      '#pricing'],
-            ['FAQ',          '#faq'],
-            ['For business', '#order'],
-          ] as [string, string][]).map(([label, href]) => (
-            <a
-              key={href}
-              href={href}
-              className="text-white/70 hover:text-white text-sm py-2.5 px-3 rounded-lg hover:bg-white/5 transition-colors"
-              {...{'x-on:click': 'menuOpen = false'}}
-            >
-              {label}
-            </a>
-          ))}
+
+          {/* Mobile links — EN */}
+          <div x-show="$store.lang.current === 'en'" x-cloak="">
+            {NAV_EN.map(([label, href]) => (
+              <a
+                key={href}
+                href={href}
+                className="text-white/70 hover:text-white text-sm py-2.5 px-3 rounded-lg hover:bg-white/5 transition-colors block"
+                {...{'x-on:click': 'menuOpen = false'}}
+              >
+                {label}
+              </a>
+            ))}
+          </div>
+
+          {/* Mobile links — LV */}
+          <div x-show="$store.lang.current === 'lv'" x-cloak="">
+            {NAV_LV.map(([label, href]) => (
+              <a
+                key={href}
+                href={href}
+                className="text-white/70 hover:text-white text-sm py-2.5 px-3 rounded-lg hover:bg-white/5 transition-colors block"
+                {...{'x-on:click': 'menuOpen = false'}}
+              >
+                {label}
+              </a>
+            ))}
+          </div>
+
           <div className="pt-4 mt-2 border-t border-k1/20 flex items-center justify-between">
+            {/* Mobile lang pill */}
             <div className="flex items-center bg-white/5 border border-white/10 rounded-full p-0.5 text-xs font-medium select-none">
-              <span className="px-3 py-1 rounded-full bg-k2 text-white">EN</span>
-              <span className="px-3 py-1 text-white/40">LV</span>
-              <span className="px-3 py-1 text-white/40">RU</span>
+              <span
+                className="px-3 py-1 rounded-full cursor-pointer transition-colors"
+                {...{'x-bind:class': "$store.lang.current === 'en' ? 'bg-k2 text-white' : 'text-white/40'"}}
+                {...{'x-on:click': "$store.lang.set('en')"}}
+              >EN</span>
+              <span
+                className="px-3 py-1 rounded-full cursor-pointer transition-colors"
+                {...{'x-bind:class': "$store.lang.current === 'lv' ? 'bg-k2 text-white' : 'text-white/40'"}}
+                {...{'x-on:click': "$store.lang.set('lv')"}}
+              >LV</span>
             </div>
             <a
               href="#order"
               className="bg-k2 text-white text-sm font-semibold px-5 py-2 rounded-lg"
               {...{'x-on:click': 'menuOpen = false'}}
             >
-              Order a song
+              <span x-show="$store.lang.current === 'en'" x-cloak="">Order a song</span>
+              <span x-show="$store.lang.current === 'lv'" x-cloak="">Pasūtīt dziesmu</span>
             </a>
           </div>
         </div>
