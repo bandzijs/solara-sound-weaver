@@ -33,10 +33,6 @@ export const metadata: Metadata = {
     title: 'Solara Flames — Custom Songs in 48 Hours',
     description: 'Your words. A real song. In 48 hours. From $49.',
   },
-  icons: {
-    icon: '/icon.svg',
-    shortcut: '/icon.svg',
-  },
   robots: {
     index: true,
     follow: true,
