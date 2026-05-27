@@ -7,7 +7,7 @@ export async function GET() {
   const admin = createAdminClient()
   const { data, error } = await admin
     .from('songs')
-    .select('id, title_lv, title_en, youtube_id, style, badge_lv, badge_en')
+    .select('id, title_lv, title_en, youtube_id, style, badge_lv, badge_en, poem_en, poem_lv')
     .order('created_at', { ascending: false })
 
   if (error) {
