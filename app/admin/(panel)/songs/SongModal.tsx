@@ -28,6 +28,8 @@ export default function SongModal({ song, onSaved, onDeleted, onClose }: Props) 
     style:      song?.style      ?? 'love-ballad',
     badge_en:   song?.badge_en   ?? '',
     badge_lv:   song?.badge_lv   ?? '',
+    poem_en:    song?.poem_en    ?? '',
+    poem_lv:    song?.poem_lv    ?? '',
   })
   const [saving, setSaving]   = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -121,6 +123,11 @@ export default function SongModal({ song, onSaved, onDeleted, onClose }: Props) 
             <Field label="Badge (LV)" value={form.badge_lv} onChange={(v) => set('badge_lv', v)} placeholder="Kāzu jubilejai" />
           </div>
 
+          <div className="grid grid-cols-2 gap-4">
+            <TextareaField label="Poem (EN)" value={form.poem_en} onChange={(v) => set('poem_en', v)} placeholder="Enter poem lyrics in English…" />
+            <TextareaField label="Poem (LV)" value={form.poem_lv} onChange={(v) => set('poem_lv', v)} placeholder="Ievadiet dziesmas tekstu latviski…" />
+          </div>
+
           {error && (
             <div className="bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3 text-red-300 text-sm">{error}</div>
           )}
@@ -166,6 +173,23 @@ function Field({ label, value, onChange, placeholder }: {
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         className="w-full bg-navy2 border border-k1/20 focus:border-k2 rounded-xl px-4 py-3 text-white text-sm placeholder:text-white/25 outline-none transition-colors duration-150"
+      />
+    </div>
+  )
+}
+
+function TextareaField({ label, value, onChange, placeholder }: {
+  label: string; value: string; onChange: (v: string) => void; placeholder?: string
+}) {
+  return (
+    <div>
+      <label className="block text-white/60 text-xs font-semibold tracking-wider uppercase mb-2">{label}</label>
+      <textarea
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        rows={5}
+        className="w-full bg-navy2 border border-k1/20 focus:border-k2 rounded-xl px-4 py-3 text-white text-sm placeholder:text-white/25 outline-none transition-colors duration-150 resize-y"
       />
     </div>
   )
