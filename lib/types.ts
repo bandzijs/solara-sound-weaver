@@ -6,8 +6,8 @@ export interface Song {
   style: string
   badge_lv: string
   badge_en: string
-  poem_en: string
-  poem_lv: string
+  poem_en?: string
+  poem_lv?: string
 }
 
 export interface Banner {
