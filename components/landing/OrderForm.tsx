@@ -18,8 +18,31 @@ const moodsLv = [
   'Vienkārši tā',
 ]
 
+const genresEn = [
+  'Hip-Hop / Rap',
+  'Pop',
+  'Rock',
+  'Latin',
+  'Country',
+  'EDM',
+  'R&B / Soul',
+  'Folk music',
+]
+
+const genresLv = [
+  'Hiphops / Reps',
+  'Pops',
+  'Roks',
+  'Latīņu',
+  'Kantri',
+  'EDM',
+  'R&B / Soul',
+  'Folklora',
+]
+
 const formData = `{
   mood: '',
+  genre: '',
   name: '',
   email: '',
   poem_text: '',
@@ -29,10 +52,10 @@ const formData = `{
   deliveryDate: '',
   async submit(e) {
     e.preventDefault()
-    if (!this.mood || !this.name.trim() || !this.email.trim() || !this.poem_text.trim()) {
+    if (!this.mood || !this.genre || !this.name.trim() || !this.email.trim() || !this.poem_text.trim()) {
       this.error = $store.lang.current === 'lv'
-        ? 'Lūdzu aizpildi visus laukus un izvēlies noskaņu.'
-        : 'Please fill in all fields and select a mood.'
+        ? 'Lūdzu aizpildi visus laukus un izvēlies noskaņu un žanru.'
+        : 'Please fill in all fields and select a mood and genre.'
       return
     }
     this.loading = true
@@ -45,7 +68,8 @@ const formData = `{
           name: this.name.trim(),
           email: this.email.trim(),
           poem_text: this.poem_text.trim(),
-          mood: this.mood
+          mood: this.mood,
+          genre: this.genre.trim()
         })
       })
       const data = await res.json()
@@ -127,58 +151,69 @@ export default function OrderForm() {
             {...{'x-on:submit': 'submit($event)'}}
             noValidate
           >
-            {/* Mood chips */}
-            <div>
-              <label className="block text-white/60 text-xs font-semibold tracking-wider uppercase mb-3">
-                <span x-show="$store.lang.current === 'en'" x-cloak="">Occasion / Mood</span>
-                <span x-show="$store.lang.current === 'lv'" x-cloak="">Notikums / Noskaņa</span>
-              </label>
+            {/* Occasion/Mood + Genre — side by side */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-              {/* EN moods */}
-              <div
-                className="flex flex-wrap gap-2"
-                x-show="$store.lang.current === 'en'"
-                x-cloak=""
-              >
-                {moodsEn.map((m) => (
-                  <button
-                    key={m}
-                    type="button"
-                    className="px-4 py-2 rounded-full border text-sm font-medium transition-all duration-150"
-                    {...{
-                      'x-on:click': `mood = mood === '${m}' ? '' : '${m}'`,
-                      'x-bind:class': `mood === '${m}'
-                        ? 'border-k3 bg-k3/15 text-k3'
-                        : 'border-k1/25 bg-transparent text-white/50 hover:border-k1/50 hover:text-white/80'`,
-                    }}
-                  >
-                    {m}
-                  </button>
-                ))}
+              {/* Occasion / Mood */}
+              <div>
+                <label className="block text-white/60 text-xs font-semibold tracking-wider uppercase mb-3">
+                  <span x-show="$store.lang.current === 'en'" x-cloak="">Occasion / Mood</span>
+                  <span x-show="$store.lang.current === 'lv'" x-cloak="">Notikums / Noskaņa</span>
+                </label>
+
+                {/* EN mood dropdown */}
+                <select
+                  x-show="$store.lang.current === 'en'"
+                  x-cloak=""
+                  x-model="mood"
+                  className="w-full bg-navy3 border border-k1/20 focus:border-k2 rounded-xl px-4 py-3 text-white text-sm outline-none transition-colors duration-150 appearance-none cursor-pointer"
+                >
+                  <option value="" disabled>Select occasion / mood</option>
+                  {moodsEn.map((m) => <option key={m} value={m}>{m}</option>)}
+                </select>
+
+                {/* LV mood dropdown */}
+                <select
+                  x-show="$store.lang.current === 'lv'"
+                  x-cloak=""
+                  x-model="mood"
+                  className="w-full bg-navy3 border border-k1/20 focus:border-k2 rounded-xl px-4 py-3 text-white text-sm outline-none transition-colors duration-150 appearance-none cursor-pointer"
+                >
+                  <option value="" disabled>Izvēlies notikumu / noskaņu</option>
+                  {moodsLv.map((m) => <option key={m} value={m}>{m}</option>)}
+                </select>
               </div>
 
-              {/* LV moods */}
-              <div
-                className="flex flex-wrap gap-2"
-                x-show="$store.lang.current === 'lv'"
-                x-cloak=""
-              >
-                {moodsLv.map((m) => (
-                  <button
-                    key={m}
-                    type="button"
-                    className="px-4 py-2 rounded-full border text-sm font-medium transition-all duration-150"
-                    {...{
-                      'x-on:click': `mood = mood === '${m}' ? '' : '${m}'`,
-                      'x-bind:class': `mood === '${m}'
-                        ? 'border-k3 bg-k3/15 text-k3'
-                        : 'border-k1/25 bg-transparent text-white/50 hover:border-k1/50 hover:text-white/80'`,
-                    }}
-                  >
-                    {m}
-                  </button>
-                ))}
+              {/* Music Genre */}
+              <div>
+                <label className="block text-white/60 text-xs font-semibold tracking-wider uppercase mb-3">
+                  <span x-show="$store.lang.current === 'en'" x-cloak="">Music Genre</span>
+                  <span x-show="$store.lang.current === 'lv'" x-cloak="">Mūzikas žanrs</span>
+                </label>
+
+                {/* EN genre dropdown */}
+                <select
+                  x-show="$store.lang.current === 'en'"
+                  x-cloak=""
+                  x-model="genre"
+                  className="w-full bg-navy3 border border-k1/20 focus:border-k2 rounded-xl px-4 py-3 text-white text-sm outline-none transition-colors duration-150 appearance-none cursor-pointer"
+                >
+                  <option value="" disabled>Select genre</option>
+                  {genresEn.map((g) => <option key={g} value={g}>{g}</option>)}
+                </select>
+
+                {/* LV genre dropdown */}
+                <select
+                  x-show="$store.lang.current === 'lv'"
+                  x-cloak=""
+                  x-model="genre"
+                  className="w-full bg-navy3 border border-k1/20 focus:border-k2 rounded-xl px-4 py-3 text-white text-sm outline-none transition-colors duration-150 appearance-none cursor-pointer"
+                >
+                  <option value="" disabled>Izvēlies žanru</option>
+                  {genresLv.map((g) => <option key={g} value={g}>{g}</option>)}
+                </select>
               </div>
+
             </div>
 
             {/* Name */}

@@ -110,7 +110,7 @@ export default function Hero() {
         {/* Stats strip */}
         <div className="border-t border-k1/20 pt-10 grid grid-cols-2 sm:grid-cols-4 gap-6">
           {([
-            ['500+', 'Songs created',       'Izveidotas dziesmas'],
+            ['50+',  'Songs created',       'Izveidotas dziesmas'],
             ['48 h', 'Avg. delivery',        'Vid. piegāde'],
             ['8',    'Genres',               'Žanri'],
             ['$49',  'Starting from',        'Sākot no'],

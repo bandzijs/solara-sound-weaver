@@ -174,7 +174,7 @@ export default function SongShowcase({ songs }: SongShowcaseProps) {
             {/* Browse all link */}
             <div className="text-center mt-10">
               <a
-                href="https://www.youtube.com/@SolaraFlames"
+                href="https://www.youtube.com/channel/UC6AqtJ20Juy5xH6YdfNGuhw"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 text-k3 hover:text-white text-sm font-medium border border-k3/30 hover:border-k3/60 px-6 py-2.5 rounded-full transition-all duration-200"
