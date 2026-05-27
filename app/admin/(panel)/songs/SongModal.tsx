@@ -36,6 +36,14 @@ export default function SongModal({ song, onSaved, onDeleted, onClose }: Props) 
   const [error, setError]     = useState('')
 
   function set(field: keyof typeof form, value: string) {
+    if (field === 'youtube_id') {
+      // Extract ID from full YouTube URLs
+      try {
+        const url = new URL(value)
+        if (url.hostname.includes('youtube.com')) value = url.searchParams.get('v') ?? value
+        else if (url.hostname === 'youtu.be') value = url.pathname.slice(1)
+      } catch { /* not a URL, use as-is */ }
+    }
     setForm((prev) => ({ ...prev, [field]: value }))
   }
 
