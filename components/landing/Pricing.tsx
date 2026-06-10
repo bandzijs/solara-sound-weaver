@@ -7,7 +7,7 @@ const tiersEn = [
       '1 original song',
       '1 revision round',
       '48-hour delivery',
-      'MP3 + WAV files',
+      'MP3',
       'Personal use license',
     ],
     cta: 'Order Personal',
@@ -54,7 +54,7 @@ const tiersLv = [
       '1 oriģināldziesma',
       '1 labojumu kārta',
       '48h piegāde',
-      'MP3 + WAV faili',
+      'MP3',
       'Personīgā licence',
     ],
     cta: 'Pasūtīt Personal',
@@ -187,10 +187,6 @@ export default function Pricing() {
           <TierCards tiers={tiersLv} badgeLabel="Populārākais" perSong="/ dziesma" />
         </div>
 
-        <p className="text-center text-white/30 text-xs mt-8">
-          <span x-show="$store.lang.current === 'en'" x-cloak="">All plans include a satisfaction guarantee. Not happy? We&apos;ll make it right.</span>
-          <span x-show="$store.lang.current === 'lv'" x-cloak="">Visi plāni iekļauj apmierinātības garantiju. Nav apmierināts? Mēs to labosim.</span>
-        </p>
       </div>
     </section>
   )
