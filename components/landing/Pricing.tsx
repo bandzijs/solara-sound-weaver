@@ -1,7 +1,7 @@
 const tiersEn = [
   {
     name: 'Personal',
-    price: '$49',
+    price: '$25',
     desc: 'Perfect for gifts, birthdays, and personal moments.',
     features: [
       '1 original song',
@@ -15,7 +15,7 @@ const tiersEn = [
   },
   {
     name: 'Premium',
-    price: '$99',
+    price: '$45',
     desc: 'For weddings, anniversaries, and unforgettable occasions.',
     features: [
       '1 original song',
@@ -30,7 +30,7 @@ const tiersEn = [
   },
   {
     name: 'Business',
-    price: '$249+',
+    price: '$100+',
     desc: 'Brand jingles, broadcast spots, and custom briefs.',
     features: [
       'Brand jingle or spot',
@@ -48,7 +48,7 @@ const tiersEn = [
 const tiersLv = [
   {
     name: 'Personal',
-    price: '$49',
+    price: '€25',
     desc: 'Ideāli dāvanām, dzimšanas dienām un personīgiem brīžiem.',
     features: [
       '1 oriģināldziesma',
@@ -62,7 +62,7 @@ const tiersLv = [
   },
   {
     name: 'Premium',
-    price: '$99',
+    price: '€45',
     desc: 'Kāzām, jubilejām un neaizmirstamiem brīžiem.',
     features: [
       '1 oriģināldziesma',
@@ -77,7 +77,7 @@ const tiersLv = [
   },
   {
     name: 'Business',
-    price: '$249+',
+    price: '€100+',
     desc: 'Zīmola dziesmas, reklāmas un individuāli uzdevumi.',
     features: [
       'Zīmola dziesma vai reklāma',
