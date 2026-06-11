@@ -45,20 +45,18 @@ const stepsLv = [
 ]
 
 const benefitsEn = [
-  'Professionally produced, not AI-generated',
-  'Real vocalists and live instruments',
+  'Powered by AI — from composition to vocals',
+  'Multilingual, any genre, fully produced',
   'MP3 + WAV delivered to your inbox',
   'Revisions included with every order',
-  'Secure payment, money-back guarantee',
   'Worldwide delivery, every language',
 ]
 
 const benefitsLv = [
-  'Profesionāli producēts, nevis AI ģenerēts',
-  'Īsti vokālisti un dzīvie instrumenti',
+  'Darbināts ar AI — no kompozīcijas līdz vokālam',
+  'Daudzvalodu, jebkurš žanrs, pilnībā producēts',
   'MP3 + WAV piegādāts uz tavu e-pastu',
   'Labojumi iekļauti ar katru pasūtījumu',
-  'Drošs maksājums, naudas atgriešanas garantija',
   'Piegāde visā pasaulē, jebkurā valodā',
 ]
 
