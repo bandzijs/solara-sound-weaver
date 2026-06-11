@@ -49,7 +49,7 @@ const benefitsEn = [
   'Multilingual, any genre, fully produced',
   'MP3 + WAV delivered to your inbox',
   'Revisions included with every order',
-  'Worldwide delivery, every language',
+  'Worldwide delivery',
 ]
 
 const benefitsLv = [
@@ -57,7 +57,7 @@ const benefitsLv = [
   'Jebkura valoda  Jebkurš žanrs  Pilna producēšana',
   'MP3 + WAV piegādāts uz tavu e-pastu',
   'Labojumi iekļauti ar katru pasūtījumu',
-  'Piegāde visā pasaulē, jebkurā valodā',
+  'Piegāde visā pasaulē',
 ]
 
 export default function HowItWorks() {
