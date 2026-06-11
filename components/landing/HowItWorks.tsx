@@ -53,8 +53,8 @@ const benefitsEn = [
 ]
 
 const benefitsLv = [
-  'Darbināts ar AI — no kompozīcijas līdz vokālam',
-  'Daudzvalodu, jebkurš žanrs, pilnībā producēts',
+  'Radīts ar AI — no kompozīcijas līdz vokālam',
+  'Jebkura valoda  Jebkurš žanrs  Pilna producēšana',
   'MP3 + WAV piegādāts uz tavu e-pastu',
   'Labojumi iekļauti ar katru pasūtījumu',
   'Piegāde visā pasaulē, jebkurā valodā',
