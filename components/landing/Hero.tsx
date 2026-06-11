@@ -110,14 +110,15 @@ export default function Hero() {
         {/* Stats strip */}
         <div className="border-t border-k1/20 pt-10 grid grid-cols-2 sm:grid-cols-4 gap-6">
           {([
-            ['50+',  'Songs created',       'Izveidotas dziesmas'],
-            ['48 h', 'Avg. delivery',        'Vid. piegāde'],
-            ['8',    'Genres',               'Žanri'],
-            ['$49',  'Starting from',        'Sākot no'],
-          ] as [string, string, string][]).map(([value, labelEn, labelLv]) => (
+            ['50+',  '50+',   'Songs created',       'Izveidotas dziesmas'],
+            ['48 h', '48 h',  'Avg. delivery',        'Vid. piegāde'],
+            ['8',    '8',     'Genres',               'Žanri'],
+            ['$25',  '€25',   'Starting from',        'Sākot no'],
+          ] as [string, string, string, string][]).map(([valueEn, valueLv, labelEn, labelLv]) => (
             <div key={labelEn} className="text-center">
               <div className="font-syne font-bold text-white text-2xl sm:text-3xl mb-1">
-                {value}
+                <span x-show="$store.lang.current === 'en'" x-cloak="">{valueEn}</span>
+                <span x-show="$store.lang.current === 'lv'" x-cloak="">{valueLv}</span>
               </div>
               <div className="text-white/45 text-sm">
                 <span x-show="$store.lang.current === 'en'" x-cloak="">{labelEn}</span>
